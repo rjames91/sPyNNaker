@@ -568,7 +568,7 @@ void neuron_do_timestep_update(timer_t time) {
 
         // record these neuron parameter. Just as cheap to set then to gate
         inputs_excitatory->inputs[indexes->exc].input = total_exc;
-        inputs_inhibitory->inputs[indexes->inh].input = total_inh;
+        inputs_inhibitory->inputs[indexes->inh].input = additional_input->I_H;
 
         // For recording and visualising threshold
         // inputs_inhibitory->inputs[neuron_index].input = (threshold_type->threshold_value +
