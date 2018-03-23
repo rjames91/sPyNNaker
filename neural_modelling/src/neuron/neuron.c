@@ -7,7 +7,7 @@
 #include "neuron.h"
 #include "models/neuron_model.h"
 #include "input_types/input_type.h"
-#include "additional_inputs/additional_input_pacemaker_impl.h"
+#include "additional_inputs/additional_input.h"
 #include "threshold_types/threshold_type.h"
 #include "synapse_types/synapse_types.h"
 #include "plasticity/synapse_dynamics.h"
@@ -567,6 +567,8 @@ void neuron_do_timestep_update(timer_t time) {
         // record these neuron parameter. Just as cheap to set then to gate
         inputs_excitatory->inputs[indexes->exc].input = total_exc;
         inputs_inhibitory->inputs[indexes->inh].input = additional_input->I_H;
+        		// total_inh;
+        		//additional_input->I_H;
 
         // For recording and visualising threshold
         // inputs_inhibitory->inputs[neuron_index].input = (threshold_type->threshold_value +

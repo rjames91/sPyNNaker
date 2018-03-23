@@ -74,6 +74,7 @@ static input_t additional_input_get_input_value_as_current(
 //			additional_input->e_to_t_on_tau_m_approx,
 //			additional_input->I_H);
 
+//    return additional_input->I_H;
     return additional_input->I_H;
 }
 
