@@ -67,12 +67,12 @@ static input_t additional_input_get_input_value_as_current(
 			0.001k *
 			additional_input->m *
 			(membrane_voltage - -65k); //additional_input->E_H);
-	log_info("mem_V: %k, m: %k, m_inf: %k, tau_m: %k, I_H = %k",
-			membrane_voltage,
-			additional_input->m,
-			additional_input->m_inf,
-			additional_input->e_to_t_on_tau_m_approx,
-			additional_input->I_H);
+//	log_info("mem_V: %k, m: %k, m_inf: %k, tau_m: %k, I_H = %k",
+//			membrane_voltage,
+//			additional_input->m,
+//			additional_input->m_inf,
+//			additional_input->e_to_t_on_tau_m_approx,
+//			additional_input->I_H);
 
     return additional_input->I_H;
 }

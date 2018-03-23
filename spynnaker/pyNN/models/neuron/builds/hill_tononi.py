@@ -167,8 +167,8 @@ class HillTononi(AbstractPopulationVertex):
                                                 v_thresh_tau,
                                                 v_thresh_Na_reversal)
 
-        AbstractPopulationVertex.__init__(
-            self, n_neurons=n_neurons, binary="Hill_Tononi.aplx", label=label,
+        super(HillTononi, self).__init__(
+            n_neurons=n_neurons, binary="Hill_Tononi.aplx", label=label,
             max_atoms_per_core=HillTononi._model_based_max_atoms_per_core,
             spikes_per_second=spikes_per_second,
             ring_buffer_sigma=ring_buffer_sigma,
