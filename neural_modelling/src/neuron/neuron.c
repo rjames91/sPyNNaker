@@ -566,7 +566,7 @@ void neuron_do_timestep_update(timer_t time) {
 
         // record these neuron parameter. Just as cheap to set then to gate
         inputs_excitatory->inputs[indexes->exc].input = total_exc;
-        inputs_inhibitory->inputs[indexes->inh].input = additional_input->I_H;
+        inputs_inhibitory->inputs[indexes->inh].input = additional_input->I_int;
         		// total_inh;
         		//additional_input->I_H;
 

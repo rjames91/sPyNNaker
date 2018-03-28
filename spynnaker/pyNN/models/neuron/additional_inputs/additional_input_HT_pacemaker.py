@@ -74,7 +74,7 @@ class AdditionalInputHTPacemaker(AbstractAdditionalInput):
                 float(-machine_time_step) / (1000.0 * x)))
 
     def get_n_parameters(self):
-        return 7
+        return 10
 
     @inject_items({"machine_time_step": "MachineTimeStep"})
     def get_parameters(self, machine_time_step):

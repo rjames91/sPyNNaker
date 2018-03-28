@@ -9,14 +9,16 @@
 typedef struct additional_input_t {
 
     // Pacemaker Current
-    accum    I_H;
+    accum    I_int;
     accum    m;
     accum    m_inf;
     accum    e_to_t_on_tau_m_approx;
+    accum    h;
+    accum	 h_inf;
+    accum    e_to_t_on_tau_h_approx;
     accum    g_H; // max pacemaker conductance
     accum    E_H; // reversal potential
     accum    dt;
-
 } additional_input_t;
 
 static input_t additional_input_get_input_value_as_current(
@@ -63,7 +65,7 @@ static input_t additional_input_get_input_value_as_current(
 			additional_input->e_to_t_on_tau_m_approx;
 
 	// H is 1 and constant, so ignore - also not sure of activation gating power at present
-	additional_input->I_H = // additional_input->g_H *
+	additional_input->I_int = // additional_input->g_H *
 			0.001k *
 			additional_input->m *
 			(membrane_voltage - -65k); //additional_input->E_H);
@@ -75,7 +77,7 @@ static input_t additional_input_get_input_value_as_current(
 //			additional_input->I_H);
 
 //    return additional_input->I_H;
-    return additional_input->I_H;
+    return additional_input->I_int;
 }
 
 static void additional_input_has_spiked(
