@@ -23,7 +23,7 @@ static input_t additional_input_get_input_value_as_current(
         additional_input_pointer_t additional_input,
         state_t membrane_voltage) {
 
-    profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_DYNAMIC_INTRINSIC_CURRENT);
+    profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_INTRINSIC_CURRENT);
 
 	REAL m_inf_V_shift = (membrane_voltage >> 7) + 0.7421875k;
 	REAL tau_m_V_shift = (membrane_voltage >> 7) - 0.234375k;
@@ -63,7 +63,7 @@ static input_t additional_input_get_input_value_as_current(
 			additional_input->m *
 			(membrane_voltage - -65k); //additional_input->E_H);
 
-    profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_DYNAMIC_INTRINSIC_CURRENT);
+    profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_INTRINSIC_CURRENT);
 
 //	log_info("mem_V: %k, m: %k, m_inf: %k, tau_m: %k, I_H = %k",
 //			membrane_voltage,
