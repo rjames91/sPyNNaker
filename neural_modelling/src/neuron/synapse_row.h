@@ -55,7 +55,7 @@
 
 //! how many bits the synapse can support to represent the neuron id.
 #ifndef SYNAPSE_INDEX_BITS
-#define SYNAPSE_INDEX_BITS 8
+#define SYNAPSE_INDEX_BITS 5
 #endif
 
 //! how many bits the synapse type will need (includes the neuron id size)

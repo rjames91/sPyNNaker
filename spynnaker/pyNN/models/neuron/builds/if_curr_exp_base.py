@@ -6,7 +6,7 @@ from spynnaker.pyNN.models.neuron.threshold_types import ThresholdTypeStatic
 from spynnaker.pyNN.models.neuron import AbstractPopulationVertex
 
 # global objects
-DEFAULT_MAX_ATOMS_PER_CORE = 255
+DEFAULT_MAX_ATOMS_PER_CORE = 31
 _apv_defs = AbstractPopulationVertex.non_pynn_default_parameters
 
 
