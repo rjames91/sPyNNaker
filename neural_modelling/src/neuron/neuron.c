@@ -564,9 +564,13 @@ void neuron_do_timestep_update(timer_t time) {
         	total_inh += inh_syn_input[i];
         }
 
+
+        input_t add_in = additional_input_get_input_value_as_current(
+                        additional_input, voltage);
+
         // record these neuron parameter. Just as cheap to set then to gate
         inputs_excitatory->inputs[indexes->exc].input = total_exc;
-        inputs_inhibitory->inputs[indexes->inh].input = additional_input->I_int;
+        inputs_inhibitory->inputs[indexes->inh].input = add_in;
         		// total_inh;
         		//additional_input->I_H;
 
@@ -584,8 +588,7 @@ void neuron_do_timestep_update(timer_t time) {
         // Get external bias from any source of intrinsic plasticity
         input_t external_bias =
             synapse_dynamics_get_intrinsic_bias(time, neuron_index) +
-            additional_input_get_input_value_as_current(
-                additional_input, voltage);
+			add_in;
 
         // Update neuron parameters
         state_t result = neuron_model_state_update(
