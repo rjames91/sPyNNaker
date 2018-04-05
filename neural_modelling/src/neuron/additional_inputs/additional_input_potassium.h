@@ -26,6 +26,8 @@ static input_t additional_input_get_input_value_as_current(
         additional_input_pointer_t additional_input,
         state_t membrane_voltage) {
 
+    profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_INTRINSIC_CURRENT);
+
     additional_input->g_DK = 1.25k;
 
 	additional_input->m_inf = 1k / (1k + 0.25k D * D * D);
@@ -45,14 +47,16 @@ static input_t additional_input_get_input_value_as_current(
 			additional_input->m_inf *
 			(membrane_voltage - -90k); //additional_input->E_H);
 
+/*
 	log_info("mem_V: %k, D: %k, m_inf: %k, NaInflux: %k, I_DK = %k",
 			membrane_voltage,
 			additional_input->D,
 			additional_input->m_inf,
 			additional_input->NaInflux,
 			additional_input->I_DK);
+*/
+    profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_INTRINSIC_CURRENT);
 
-//    return additional_input->I_H;
     return additional_input->I_DK;
 }
 
