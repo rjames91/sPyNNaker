@@ -28,14 +28,14 @@ static input_t additional_input_get_input_value_as_current(
 
     profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_INTRINSIC_CURRENT);
 
-    additional_input->g_H = 0.007k;
+    additional_input->g_NaP = 0.007k;
 
 	additional_input->m_inf = 1k / (1k + expk((-membrane_voltage+55.7k)/7.7k)); //not sure on the position of the minus
 	                                                                            //sign is different in code and paper.
 
 	// H is 1 and constant, so ignore - also not sure of activation gating power at present
 	additional_input->I_NaP = - // the original code has this as a negative current so a "-" may be here.
-	        additional_input->g_H *
+	        additional_input->g_NaP *
 			additional_input->m_inf *
 			additional_input->m_inf *
 			additional_input->m_inf *

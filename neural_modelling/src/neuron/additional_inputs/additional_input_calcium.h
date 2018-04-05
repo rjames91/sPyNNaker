@@ -28,21 +28,21 @@ static input_t additional_input_get_input_value_as_current(
 
     profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_INTRINSIC_CURRENT);
 
-    additional_input->g_H = 0.003k;
+    additional_input->g_T = 0.003k;
 
 	additional_input->m_inf = 1k / (1k + expk(-(membrane_voltage+59k) * 0.16129k)); //1/6.2=0.16129032258
 
-	additional_input->h_inf = 1k / (1k + expk((v + 83.0k)*0.25k)); //1/4=0.25
+	additional_input->h_inf = 1k / (1k + expk((membrane_voltage + 83.0k)*0.25k)); //1/4=0.25
 
 	additional_input->e_to_t_on_tau_m = expk(-0.1k /
 	        (0.13k +
-	         0.22 * expk(0.05988k * (membrane_voltage+132k)) // 1/16.7=0.05988023952
-	        + expk(0.054945 * (membrane_voltage + 16.8k)))); // 1/18.2=0.05494505494
+	         0.22k * expk(0.05988k * (membrane_voltage+132k)) // 1/16.7=0.05988023952
+	        + expk(0.054945k * (membrane_voltage + 16.8k)))); // 1/18.2=0.05494505494
 
-    aditional_input->e_to_t_on_tau_h = expk(-0.1k /
+    additional_input->e_to_t_on_tau_h = expk(-0.1k /
 	        (8.2k +
 	        (56.6k + 0.27k * expk((membrane_voltage + 115.2k) * 0.2k)) / // 1/5.0=0.2
-	        (1.0k + expk((membrane_voltage + 86.0k) * 0.3125))));        // 1/3.2=0.3125
+	        (1.0k + expk((membrane_voltage + 86.0k) * 0.3125k))));        // 1/3.2=0.3125
 
 	// Update m
 	additional_input->m = additional_input->m_inf +
@@ -55,8 +55,8 @@ static input_t additional_input_get_input_value_as_current(
 			additional_input->e_to_t_on_tau_h;
 
 	// H is 1 and constant, so ignore - also not sure of activation gating power at present
-	additional_input->I_H =
-	        additional_input->g_H *
+	additional_input->I_T =
+	        additional_input->g_T *
 			additional_input->m *
 			additional_input->m *
 			additional_input->h *
