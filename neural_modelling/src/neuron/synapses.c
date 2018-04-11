@@ -358,6 +358,7 @@ void synapses_do_timestep_update(timer_t time) {
 bool synapses_process_synaptic_row(uint32_t time, synaptic_row_t row,
                                    bool write, uint32_t process_id) {
 
+    profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_SYNAPTIC_ROW);
     _print_synaptic_row(row);
 
     // Get address of non-plastic region from row
@@ -373,13 +374,13 @@ bool synapses_process_synaptic_row(uint32_t time, synaptic_row_t row,
         address_t plastic_region_address = synapse_row_plastic_region(row);
 
         // Process any plastic synapses
-        profiler_write_entry_disable_fiq(
+        profiler_write_entry_disable_irq_fiq(
             PROFILER_ENTER | PROFILER_PROCESS_PLASTIC_SYNAPSES);
         if (!synapse_dynamics_process_plastic_synapses(plastic_region_address,
                 fixed_region_address, ring_buffers, time)) {
             return false;
         }
-        profiler_write_entry_disable_fiq(
+        profiler_write_entry_disable_irq_fiq(
             PROFILER_EXIT | PROFILER_PROCESS_PLASTIC_SYNAPSES);
 
 
@@ -393,12 +394,14 @@ bool synapses_process_synaptic_row(uint32_t time, synaptic_row_t row,
     // **NOTE** this is done after initiating DMA in an attempt
     // to hide cost of DMA behind this loop to improve the chance
     // that the DMA controller is ready to read next synaptic row afterwards
-    profiler_write_entry_disable_fiq(
+    profiler_write_entry_disable_irq_fiq(
              PROFILER_ENTER | PROFILER_PROCESS_FIXED_SYNAPSES);
     _process_fixed_synapses(fixed_region_address, time);
-    profiler_write_entry_disable_fiq(
+    profiler_write_entry_disable_irq_fiq(
              PROFILER_EXIT | PROFILER_PROCESS_FIXED_SYNAPSES);
     //}
+
+    profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_SYNAPTIC_ROW);
     return true;
 }
 

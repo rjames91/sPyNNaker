@@ -10,3 +10,4 @@
 #define PROFILER_DMA_CALLBACK             8
 #define PROFILER_POP_TABLE_GET_FIRST      9
 #define PROFILER_POP_TABLE_GET_NEXT      10
+#define PROFILER_SYNAPTIC_ROW            11
