@@ -28,7 +28,7 @@ def write_exp_lut(spec, time_constant, size, shift,
         time = (i << shift)
 
         # Multiply by time constant and calculate negative exponential
-        value = float(time) * time_constant_reciprocal
+        value = float(time/10) * time_constant_reciprocal
         exp_float = math.exp(-value)
 
         # Convert to fixed-point and write to spec

@@ -23,10 +23,10 @@ typedef int16_t pre_trace_t;
 //---------------------------------------
 // Exponential decay lookup parameters
 #define TAU_PLUS_TIME_SHIFT 0
-#define TAU_PLUS_SIZE 256
+#define TAU_PLUS_SIZE 1024
 
 #define TAU_MINUS_TIME_SHIFT 0
-#define TAU_MINUS_SIZE 256
+#define TAU_MINUS_SIZE 4096
 
 // Helper macros for looking up decays
 #define DECAY_LOOKUP_TAU_PLUS(time) \

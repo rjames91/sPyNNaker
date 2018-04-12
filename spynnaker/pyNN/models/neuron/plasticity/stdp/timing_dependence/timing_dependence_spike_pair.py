@@ -9,9 +9,9 @@ from spynnaker.pyNN.models.neuron.plasticity.stdp.synapse_structure\
 import logging
 logger = logging.getLogger(__name__)
 
-LOOKUP_TAU_PLUS_SIZE = 256
+LOOKUP_TAU_PLUS_SIZE = 1024
 LOOKUP_TAU_PLUS_SHIFT = 0
-LOOKUP_TAU_MINUS_SIZE = 256
+LOOKUP_TAU_MINUS_SIZE = 4096
 LOOKUP_TAU_MINUS_SHIFT = 0
 
 
@@ -70,9 +70,11 @@ class TimingDependenceSpikePair(AbstractTimingDependence):
     @overrides(AbstractTimingDependence.write_parameters)
     def write_parameters(self, spec, machine_time_step, weight_scales):
         # Check timestep is valid
-        if machine_time_step != 1000:
-            raise NotImplementedError(
-                "STDP LUT generation currently only supports 1ms timesteps")
+#         if machine_time_step != 1000:
+#             raise NotImplementedError(
+#                 "STDP LUT generation currently only supports 1ms timesteps")
+        print "\nWarning, writing lookup table at {} resolution".format(machine_time_step/1000)
+
 
         # Write lookup tables
         self._tau_plus_last_entry = plasticity_helpers.write_exp_lut(
