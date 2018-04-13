@@ -52,19 +52,19 @@ static inline uint32_t _get_neuron_id(
 }
 
 static inline void _print_master_population_table() {
-    log_debug("master_population\n");
-    log_debug("------------------------------------------\n");
+    log_info("master_population\n");
+    log_info("------------------------------------------\n");
     for (uint32_t i = 0; i < master_population_table_length; i++) {
         master_population_table_entry entry = master_population_table[i];
         for (uint16_t j = entry.start; j < (entry.start + entry.count); j++) {
-            log_debug(
+            log_info(
                 "index (%d, %d), key: 0x%.8x, mask: 0x%.8x, address: 0x%.8x,"
                 " row_length: %u\n", i, j, entry.key, entry.mask,
                 _get_address(address_list[j]),
                 _get_row_length(address_list[j]));
         }
     }
-    log_debug("------------------------------------------\n");
+    log_info("------------------------------------------\n");
 }
 
 bool population_table_initialise(
@@ -73,14 +73,14 @@ bool population_table_initialise(
     log_debug("population_table_initialise: starting");
 
     master_population_table_length = table_address[0];
-    log_debug("master pop table length is %d\n", master_population_table_length);
-    log_debug(
+    log_info("master pop table length is %d\n", master_population_table_length);
+    log_info(
         "master pop table entry size is %d\n",
         sizeof(master_population_table_entry));
     uint32_t n_master_pop_bytes =
         master_population_table_length * sizeof(master_population_table_entry);
     uint32_t n_master_pop_words = n_master_pop_bytes >> 2;
-    log_debug("pop table size is %d\n", n_master_pop_bytes);
+    log_info("pop table size is %d\n", n_master_pop_bytes);
 
     // only try to malloc if there's stuff to malloc.
     if (n_master_pop_bytes != 0){
