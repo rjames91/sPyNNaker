@@ -24,7 +24,7 @@ static inline input_t* input_type_get_input_value(
     use(input_type);
 
     for (int i=0; i< num_receptors; i++){
-    	value[i] = value[i] * ulrbits(weight_scalars[i]); // DO NOT CHANGE 3!!!
+    	value[i] = value[i] * ulrbits(weight_scalars[i]);
 //    	log_info("weight_scalar = %R", ulrbits(weight_scalars[i]));
     }
     return &value[0];

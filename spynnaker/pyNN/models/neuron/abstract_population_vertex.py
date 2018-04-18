@@ -135,7 +135,7 @@ class AbstractPopulationVertex(
             self, n_neurons, binary, label, max_atoms_per_core,
             spikes_per_second, ring_buffer_sigma, incoming_spike_buffer_size,
             model_name, neuron_model, input_type, synapse_type, threshold_type,
-            additional_input=None, constraints=None, weight_precision=[0.01, 0.01]):
+            additional_input=None, constraints=None, weight_precision=None):
         # pylint: disable=too-many-arguments, too-many-locals
         super(AbstractPopulationVertex, self).__init__(
             label, constraints, max_atoms_per_core)

@@ -8,7 +8,7 @@ from spynnaker.pyNN.models.neuron import AbstractPopulationVertex
 
 # global objects
 DEFAULT_MAX_ATOMS_PER_CORE = 255
-
+DEFAULT_WEIGHT_PRECISION = [0.001, 0.00002, 0.001]
 
 class IFCurrDualExpBase(AbstractPopulationVertex):
     """ Leaky integrate and fire neuron with two exponentially decaying \
@@ -17,6 +17,7 @@ class IFCurrDualExpBase(AbstractPopulationVertex):
     """
 
     _model_based_max_atoms_per_core = DEFAULT_MAX_ATOMS_PER_CORE
+    _weight_precision = DEFAULT_WEIGHT_PRECISION
 
     default_parameters = {
         'tau_m': 20.0, 'cm': 1.0, 'v_rest': -65.0, 'v_reset': -65.0,
@@ -69,7 +70,8 @@ class IFCurrDualExpBase(AbstractPopulationVertex):
             incoming_spike_buffer_size=incoming_spike_buffer_size,
             model_name="IF_curr_dual_exp", neuron_model=neuron_model,
             input_type=input_type, synapse_type=synapse_type,
-            threshold_type=threshold_type, constraints=constraints)
+            threshold_type=threshold_type, constraints=constraints,
+            weight_precision=IFCurrDualExpBase._weight_precision)
 
     @staticmethod
     def set_model_max_atoms_per_core(new_value=DEFAULT_MAX_ATOMS_PER_CORE):
