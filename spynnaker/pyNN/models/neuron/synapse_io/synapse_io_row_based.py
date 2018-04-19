@@ -10,7 +10,8 @@ from spynnaker.pyNN.models.neuron.synapse_dynamics import \
     SynapseDynamicsStructuralStatic, SynapseDynamicsStructuralSTDP
 from .abstract_synapse_io import AbstractSynapseIO
 from spynnaker.pyNN.models.neuron.synapse_dynamics \
-    import AbstractStaticSynapseDynamics, AbstractSynapseDynamicsStructural
+    import AbstractStaticSynapseDynamics, AbstractSynapseDynamicsStructural, \
+           AbstractPlasticSynapseDynamics
 from spynnaker.pyNN.models.neuron.synapse_dynamics \
     import SynapseDynamicsSTDP
 from spynnaker.pyNN.models.neuron.synapse_dynamics \
@@ -151,7 +152,8 @@ class SynapseIORowBased(AbstractSynapseIO):
             pp_data = [numpy.zeros(0, dtype="uint32") for _ in range(n_rows)]
             fp_size = [numpy.zeros(1, dtype="uint32") for _ in range(n_rows)]
             pp_size = [numpy.zeros(1, dtype="uint32") for _ in range(n_rows)]
-        elif (isinstance(synapse_dynamics, SynapseDynamicsSTDP) or
+        elif (isinstance(synapse_dynamics, AbstractPlasticSynapseDynamics) or
+              # isinstance(synapse_dynamics, SynapseDynamicsSTDP) or
               isinstance(synapse_dynamics, SynapseDynamicsStructuralSTDP)):
 
             # Blank the static data

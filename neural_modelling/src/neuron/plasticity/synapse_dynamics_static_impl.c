@@ -103,3 +103,7 @@ bool add_plastic_neuron_with_id(uint32_t id, address_t row, uint32_t weight,
     use(type);
     return false;
 }
+
+void synapse_dynamics_set_neuron_array(neuron_pointer_t neuron_array){
+    use(neuron_array);
+}

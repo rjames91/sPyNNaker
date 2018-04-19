@@ -110,7 +110,7 @@ class ConnectionHolder(object):
                 " you are trying to see the data before changes have been"
                 " made.  Try examining the {} after the call to run.".format(
                     self._data_items_to_return))
-
+        
         # Join all the connections that have been added (probably over multiple
         # sub-vertices of a population)
         connections = numpy.concatenate(self._connections)
@@ -163,10 +163,10 @@ class ConnectionHolder(object):
             if self._data_items_to_return is None:
                 return []
 
+
             # Keep track of the matrices
             merged_connections = list()
             for item in self._data_items_to_return:
-
                 # Build an empty matrix and fill it with NAN
                 matrix = numpy.empty((self._n_pre_atoms, self._n_post_atoms))
                 matrix.fill(numpy.nan)
@@ -174,8 +174,10 @@ class ConnectionHolder(object):
                 # Fill in the values that have data
                 # TODO: Change this to sum the items with the same
                 #       (source, target) pairs
-                matrix[connections["source"], connections["target"]] = \
-                    connections[item]
+                weight = connections[item]
+                pre = connections["source"]
+                post = connections["target"]
+                matrix[pre, post] = weight
 
                 # Store the matrix generated
                 merged_connections.append(matrix)

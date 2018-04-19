@@ -447,6 +447,8 @@ bool neuron_initialise(address_t address, uint32_t recording_flags_param,
 
     _print_neuron_parameters();
 
+    synapse_dynamics_set_neuron_array(neuron_array);
+
     return true;
 }
 

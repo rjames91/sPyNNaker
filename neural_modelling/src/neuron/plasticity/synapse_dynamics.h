@@ -4,6 +4,7 @@
 #include <common/neuron-typedefs.h>
 #include <neuron/synapse_row.h>
 #include <neuron/structural_plasticity/sp_structs.h>
+#include <neuron/models/neuron_model.h>
 
 address_t synapse_dynamics_initialise(
     address_t address, uint32_t n_neurons,
@@ -60,5 +61,8 @@ bool remove_plastic_neuron_at_offset(uint32_t offset, address_t row);
 //! \return bool: was the addition successful?
 bool add_plastic_neuron_with_id(uint32_t id, address_t row, uint32_t weight,
                                 uint32_t delay, uint32_t type);
+
+
+void synapse_dynamics_set_neuron_array(neuron_pointer_t neuron_array);
 
 #endif // _SYNAPSE_DYNAMICS_H_

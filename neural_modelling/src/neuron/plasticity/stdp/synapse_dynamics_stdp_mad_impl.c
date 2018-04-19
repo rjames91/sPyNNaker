@@ -3,6 +3,7 @@
 
 // sPyNNaker neural modelling includes
 #include <neuron/synapses.h>
+#include <neuron/plasticity/synapse_dynamics.h>
 
 // Plasticity includes
 #include "maths.h"
@@ -13,7 +14,7 @@
 #include <string.h>
 #include <debug.h>
 #include <utils.h>
-#include <neuron/plasticity/synapse_dynamics.h>
+
 
 static uint32_t synapse_type_index_bits;
 static uint32_t synapse_index_bits;
@@ -449,4 +450,8 @@ bool add_plastic_neuron_with_id(uint32_t id, address_t row,
     fixed_region[1] = fixed_region[1] + 1;
     return true;
 }
-#endif
+#endif //SYNGEN_ENABLED
+
+void synapse_dynamics_set_neuron_array(neuron_pointer_t neuron_array){
+    use(neuron_array);
+}
