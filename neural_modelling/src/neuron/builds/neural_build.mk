@@ -117,6 +117,9 @@ $$(call build_dir, $(1)): $(1) $$(SYNAPSE_TYPE_H) \
 	      -DSTDP_ENABLED=$(STDP_ENABLED) \
 	      -DSYNGEN_ENABLED=$(SYNGEN_ENABLED) \
 	      -include $$(SYNAPSE_TYPE_H) \
+	      -include $$(NEURON_MODEL_H) \
+	      -include $$(THRESHOLD_TYPE_H) \
+	      -include $$(ADDITIONAL_INPUT_H) \
 	      -include $$(WEIGHT_DEPENDENCE_H) \
 	      -include $$(TIMING_DEPENDENCE_H) -o $$@ $$<
 endef

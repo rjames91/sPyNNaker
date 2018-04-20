@@ -16,6 +16,7 @@ class WeightDependenceAdditiveDvDt(
         self._w_min = w_min
         self._w_max = w_max
 
+
     @property
     def w_min(self):
         return self._w_min

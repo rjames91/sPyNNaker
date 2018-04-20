@@ -15,7 +15,7 @@
 #include <debug.h>
 #include <utils.h>
 
-#include <neuron/models/neuron_model_lif_dv_impl.h>
+// #include <neuron/models/neuron_model_lif_dv_impl.h>
 
 static uint32_t _synapse_type_index_bits;
 static uint32_t _synapse_index_bits;
@@ -63,16 +63,21 @@ static inline final_state_t _plasticity_update_synapse(
 //---------------------------------------
 static inline plastic_synapse_t* _plastic_synapses(
         address_t plastic_region_address) {
-    const uint32_t pre_event_history_size_words =
-        sizeof(pre_event_history_t) / sizeof(uint32_t);
-    static_assert(pre_event_history_size_words * sizeof(uint32_t)
-                  == sizeof(pre_event_history_t),
-                  "Size of pre_event_history_t structure should be a multiple"
-                  " of 32-bit words");
+    // const uint32_t pre_event_history_size_words =
+        // sizeof(pre_event_history_t) / sizeof(uint32_t);
+    // static_assert(pre_event_history_size_words * sizeof(uint32_t)
+                  // == sizeof(pre_event_history_t),
+                  // "Size of pre_event_history_t structure should be a multiple"
+                  // " of 32-bit words");
+// 
+    // return (plastic_synapse_t*)
+        // (&plastic_region_address[pre_event_history_size_words]);
 
+    // TODO: --------------------------------------------------------
+    // TODO: FIGURE OUT HOW TO PASS THIS FROM PYTHON, WHICH SIZE SHOULD I CHANGE?
+    // TODO: --------------------------------------------------------
     return (plastic_synapse_t*)
-        (&plastic_region_address[pre_event_history_size_words]);
-
+        (&plastic_region_address[1]);
 
 
 }
@@ -129,13 +134,8 @@ bool synapse_dynamics_process_plastic_synapses(
 
     // Extract separate arrays of plastic synapses (from plastic region),
     // Control words (from fixed region) and number of plastic synapses
-    // TODO: --------------------------------------------------------
-    // TODO: FIGURE OUT HOW TO PASS THIS FROM PYTHON, WHICH SIZE SHOULD I CHANGE?
-    // TODO: --------------------------------------------------------
-    plastic_synapse_t *plastic_words = (plastic_synapse_t *)\
-                                            (&plastic_region_address[1]);
-//    plastic_synapse_t *plastic_words = _plastic_synapses(
-//                                               plastic_region_address);
+    plastic_synapse_t *plastic_words = _plastic_synapses(
+                                              plastic_region_address);
     const control_t *control_words = synapse_row_plastic_controls(
                                                 fixed_region_address);
 
@@ -289,3 +289,125 @@ uint32_t synapse_dynamics_get_plastic_pre_synaptic_events(){
 void synapse_dynamics_set_neuron_array(neuron_pointer_t neuron_array){
     neuron_array_plasticity = neuron_array;
 }
+
+#if SYNGEN_ENABLED == 1
+
+//! \brief  Searches the synaptic row for the the connection with the
+//!         specified post-synaptic id
+//! \param[in] id: the (core-local) id of the neuron to search for in the
+//! synaptic row
+//! \param[in] row: the core-local address of the synaptic row
+//! \param[out] sp_data: the address of a struct through which to return
+//! weight, delay information
+//! \return bool: was the search successful?
+bool find_plastic_neuron_with_id(uint32_t id, address_t row,
+                                 structural_plasticity_data_t *sp_data){
+    address_t fixed_region = synapse_row_fixed_region(row);
+    address_t plastic_region_address = synapse_row_plastic_region(row);
+    plastic_synapse_t *plastic_words =
+        _plastic_synapses(plastic_region_address);
+    control_t *control_words = synapse_row_plastic_controls(fixed_region);
+    int32_t plastic_synapse = synapse_row_num_plastic_controls(fixed_region);
+    plastic_synapse_t weight;
+    uint32_t delay;
+
+    // Loop through plastic synapses
+    bool found = false;
+    for (; plastic_synapse > 0; plastic_synapse--) {
+
+        // Get next control word (auto incrementing)
+        weight = *plastic_words++;
+        uint32_t control_word = *control_words++;
+
+        // Check if index is the one I'm looking for
+        delay = synapse_row_sparse_delay(control_word, _synapse_type_index_bits);
+        if (synapse_row_sparse_index(control_word, _synapse_index_mask)==id) {
+            found = true;
+            break;
+        }
+    }
+
+    if (found){
+        sp_data -> weight = weight;
+        sp_data -> offset = synapse_row_num_plastic_controls(fixed_region) -
+            plastic_synapse;
+        sp_data -> delay  = delay;
+        return true;
+        }
+    else{
+        sp_data -> weight = -1;
+        sp_data -> offset = -1;
+        sp_data -> delay  = -1;
+        return false;
+        }
+}
+
+//! \brief  Remove the entry at the specified offset in the synaptic row
+//! \param[in] offset: the offset in the row at which to remove the entry
+//! \param[in] row: the core-local address of the synaptic row
+//! \return bool: was the removal successful?
+bool remove_plastic_neuron_at_offset(uint32_t offset, address_t row){
+    address_t fixed_region = synapse_row_fixed_region(row);
+    plastic_synapse_t *plastic_words =
+        _plastic_synapses(synapse_row_plastic_region(row));
+    control_t *control_words = synapse_row_plastic_controls(fixed_region);
+    int32_t plastic_synapse = synapse_row_num_plastic_controls(fixed_region);
+
+    // Delete weight at offset
+    plastic_words[offset] =  plastic_words[plastic_synapse-1];
+    plastic_words[plastic_synapse-1] = 0;
+
+   // Delete control word at offset
+    control_words[offset] = control_words[plastic_synapse-1];
+    control_words[plastic_synapse-1] = 0;
+
+    // Decrement FP
+    fixed_region[1] = fixed_region[1] - 1;
+
+    return true;
+}
+
+//! ensuring the weight is of the correct type and size
+static inline plastic_synapse_t _weight_conversion(uint32_t weight){
+    return (plastic_synapse_t)(0xFFFF & weight);
+}
+
+//! packing all of the information into the required plastic control word
+static inline control_t _control_conversion(uint32_t id, uint32_t delay,
+                                            uint32_t type){
+    control_t new_control =
+        ((delay & ((1<<SYNAPSE_DELAY_BITS) - 1)) << _synapse_type_index_bits);
+    new_control |= (type & ((1<<_synapse_type_index_bits) - 1)) << _synapse_index_bits;
+    new_control |= (id & ((1<<_synapse_index_bits) - 1));
+    return new_control;
+}
+
+//! \brief  Add a plastic entry in the synaptic row
+//! \param[in] is: the (core-local) id of the post-synaptic neuron to be added
+//! \param[in] row: the core-local address of the synaptic row
+//! \param[in] weight: the initial weight associated with the connection
+//! \param[in] delay: the delay associated with the connection
+//! \param[in] type: the type of the connection (e.g. inhibitory)
+//! \return bool: was the addition successful?
+bool add_plastic_neuron_with_id(uint32_t id, address_t row,
+        uint32_t weight, uint32_t delay, uint32_t type){
+    plastic_synapse_t new_weight = _weight_conversion(weight);
+    control_t new_control = _control_conversion(id, delay, type);
+
+    address_t fixed_region = synapse_row_fixed_region(row);
+    plastic_synapse_t *plastic_words =
+        _plastic_synapses(synapse_row_plastic_region(row));
+    control_t *control_words = synapse_row_plastic_controls(fixed_region);
+    int32_t plastic_synapse = synapse_row_num_plastic_controls(fixed_region);
+
+    // Add weight at offset
+    plastic_words[plastic_synapse] = new_weight;
+
+    // Add control word at offset
+    control_words[plastic_synapse] = new_control;
+
+    // Increment FP
+    fixed_region[1] = fixed_region[1] + 1;
+    return true;
+}
+#endif //SYNGEN_ENABLED

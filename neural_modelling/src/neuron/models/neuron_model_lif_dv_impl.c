@@ -61,7 +61,9 @@ state_t neuron_model_state_update(
             neuron, neuron->V_membrane, input_this_timestep);
 
     } else {
-
+        // if (neuron->V_membrane > neuron->V_rest){
+            // neuron->V_membrane = neuron->V_reset;
+        // }
         // countdown refractory timer
         neuron->refract_timer -= 1;
     }
@@ -75,6 +77,7 @@ void neuron_model_has_spiked(neuron_pointer_t neuron) {
 //    log_info("post_spiked!");
     // reset membrane voltage
     neuron->V_membrane = neuron->V_reset;
+    // neuron->V_membrane = -40.0k;
 
     // reset refractory timer
     neuron->refract_timer  = neuron->T_refract;
