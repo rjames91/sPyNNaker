@@ -63,21 +63,15 @@ static inline final_state_t _plasticity_update_synapse(
 //---------------------------------------
 static inline plastic_synapse_t* _plastic_synapses(
         address_t plastic_region_address) {
-    // const uint32_t pre_event_history_size_words =
-        // sizeof(pre_event_history_t) / sizeof(uint32_t);
-    // static_assert(pre_event_history_size_words * sizeof(uint32_t)
-                  // == sizeof(pre_event_history_t),
-                  // "Size of pre_event_history_t structure should be a multiple"
-                  // " of 32-bit words");
-// 
-    // return (plastic_synapse_t*)
-        // (&plastic_region_address[pre_event_history_size_words]);
+    const uint32_t pre_event_history_size_words =
+        sizeof(pre_event_history_t) / sizeof(uint32_t);
+    static_assert(pre_event_history_size_words * sizeof(uint32_t)
+                  == sizeof(pre_event_history_t),
+                  "Size of pre_event_history_t structure should be a multiple"
+                  " of 32-bit words");
 
-    // TODO: --------------------------------------------------------
-    // TODO: FIGURE OUT HOW TO PASS THIS FROM PYTHON, WHICH SIZE SHOULD I CHANGE?
-    // TODO: --------------------------------------------------------
     return (plastic_synapse_t*)
-        (&plastic_region_address[1]);
+        (&plastic_region_address[pre_event_history_size_words]);
 
 
 }

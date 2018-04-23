@@ -156,7 +156,9 @@ class SynapseDynamicsDvDt(
     def _n_header_bytes(self):
         # The header contains a single timestamp and pre-trace
         n_bytes = (
-            TIME_STAMP_BYTES + self.timing_dependence.pre_trace_n_bytes)
+            TIME_STAMP_BYTES + # count bytes???
+            NUM_PRE_SYNAPTIC_EVENTS * 4 + #  time stamps for each event???
+            self.timing_dependence.pre_trace_n_bytes)
 
         # The actual number of bytes is in a word-aligned struct, so work out
         # the number to fit words
