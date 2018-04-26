@@ -71,7 +71,7 @@ static input_t additional_input_get_input_value_as_current(
 	additional_input->I_int = // additional_input->g_H *
 			0.001k *
 			additional_input->m *
-			(membrane_voltage - -65k); //additional_input->E_H);
+			(membrane_voltage - -43k); //additional_input->E_H);
 
     profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_INTRINSIC_CURRENT);
 
