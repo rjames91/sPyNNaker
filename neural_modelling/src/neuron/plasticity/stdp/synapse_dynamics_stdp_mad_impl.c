@@ -2,18 +2,18 @@
 #include "static-assert.h"
 
 // sPyNNaker neural modelling includes
-#include "../../synapses.h"
+#include <neuron/synapses.h>
 
-// Plasticity common includes
-#include "../common/maths.h"
-#include "../common/post_events.h"
+// Plasticity includes
+#include "maths.h"
+#include "post_events.h"
 
 #include "weight_dependence/weight.h"
 #include "timing_dependence/timing.h"
 #include <string.h>
 #include <debug.h>
 #include <utils.h>
-#include "../synapse_dynamics.h"
+#include <neuron/plasticity/synapse_dynamics.h>
 
 static uint32_t synapse_type_index_bits;
 static uint32_t synapse_index_bits;
@@ -216,7 +216,7 @@ address_t synapse_dynamics_initialise(
     if (!is_power_of_2(n_neurons)) {
         n_neurons_power_2 = next_power_of_2(n_neurons);
     }
-    uint32_t log_n_neurons = log_2(n_neurons_power_2);
+    uint32_t log_n_neurons = ilog_2(n_neurons_power_2);
 
     synapse_type_index_bits = log_n_neurons + SYNAPSE_TYPE_BITS;
     synapse_type_index_mask = (1 << synapse_type_index_bits) - 1;
