@@ -1,5 +1,4 @@
 from six import add_metaclass
-
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 
 
@@ -28,7 +27,7 @@ class AbstractAdditionalInput(object):
 
         :return: An array of parameters
         :rtype: \
-            list(:py:class:`spynnaker.pyNN.models.neural_properties.neural_parameter.NeuronParameter`)
+            list(:py:class:`spynnaker.pyNN.models.neural_properties.NeuronParameter`)
         """
 
     @abstractmethod

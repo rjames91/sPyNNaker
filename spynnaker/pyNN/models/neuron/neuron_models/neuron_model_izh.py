@@ -1,12 +1,11 @@
+from enum import Enum
 from spinn_utilities.overrides import overrides
 from pacman.executor.injection_decorator import inject_items
+from data_specification.enums import DataType
 from spynnaker.pyNN.models.abstract_models import AbstractContainsUnits
 from spynnaker.pyNN.models.neural_properties import NeuronParameter
 from spynnaker.pyNN.utilities.ranged import SpynnakerRangeDictionary
 from .abstract_neuron_model import AbstractNeuronModel
-from data_specification.enums import DataType
-
-from enum import Enum
 
 A = 'a'
 B = 'b'

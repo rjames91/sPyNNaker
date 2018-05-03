@@ -1,7 +1,6 @@
 from six import add_metaclass
-
-from spinn_utilities.abstract_base import AbstractBase
-from spinn_utilities.abstract_base import abstractproperty, abstractmethod
+from spinn_utilities.abstract_base import (
+    AbstractBase, abstractproperty, abstractmethod)
 
 
 @add_metaclass(AbstractBase)
@@ -15,7 +14,7 @@ class AbstractAcceptsIncomingSynapses(object):
         """ The synapse type of the vertex.
 
         :rtype:\
-            :py:class:`spynnaker.pyNN.models.neuron.synapse_types.abstract_synapse_type.AbstractSynapseType`
+            :py:class:`spynnaker.pyNN.models.neuron.synapse_types.AbstractSynapseType`
         """
 
     @abstractmethod

@@ -1,8 +1,7 @@
 from pacman.executor.injection_decorator import inject_items
-from spynnaker.pyNN.models.neural_properties import NeuronParameter
 from data_specification.enums import DataType
-from spynnaker.pyNN.models.neuron.additional_inputs \
-    import AbstractAdditionalInput
+from spynnaker.pyNN.models.neural_properties import NeuronParameter
+from .abstract_additional_input import AbstractAdditionalInput
 from spynnaker.pyNN.utilities.ranged import SpynnakerRangeDictionary
 
 import numpy

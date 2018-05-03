@@ -1,10 +1,9 @@
+from enum import Enum
 from spinn_utilities.overrides import overrides
 from data_specification.enums import DataType
 from spynnaker.pyNN.models.neural_properties import NeuronParameter
 from spynnaker.pyNN.models.neuron.threshold_types import AbstractThresholdType
 from spynnaker.pyNN.utilities.ranged import SpynnakerRangeDictionary
-
-from enum import Enum
 
 DU_TH = "du_th"
 DU_TH_INV = "du_th_inv"
