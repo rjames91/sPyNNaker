@@ -15,13 +15,13 @@
  *
  */
 
-#include <in_spikes.h>
+#include <common/in_spikes.h>
 #include "neuron.h"
 #include "synapses.h"
 #include "spike_processing.h"
-#include "population_table.h"
+#include "population_table/population_table.h"
 #include "plasticity/synapse_dynamics.h"
-#include <synaptogenesis_dynamics.h>
+#include "structural_plasticity/synaptogenesis_dynamics.h"
 #include "profile_tags.h"
 
 #include <data_specification.h>
@@ -55,6 +55,7 @@ typedef enum extra_provenance_data_region_entries{
     SYNAPTIC_WEIGHT_SATURATION_COUNT = 1,
     INPUT_BUFFER_OVERFLOW_COUNT = 2,
     CURRENT_TIMER_TICK = 3,
+	GHOST_POP_TABLE_SEARCHES = 4
 } extra_provenance_data_region_entries;
 
 //! values for the priority for each callback
@@ -115,6 +116,8 @@ void c_main_store_provenance_data(address_t provenance_region){
         spike_processing_get_buffer_overflows();
     provenance_region[CURRENT_TIMER_TICK] = time;
     log_debug("finished other provenance data");
+    provenance_region[GHOST_POP_TABLE_SEARCHES]=
+    	spike_processing_get_ghost_pop_table_searches();
 }
 
 //! \brief Initialises the model by reading in the regions and checking
@@ -289,7 +292,7 @@ void timer_callback(uint timer_count, uint unused) {
     uint cpsr = 0;
     // Do rewiring
     if (rewiring &&
-	    ((last_rewiring_time >= rewiring_period && !is_fast()) || is_fast())) {
+        ((last_rewiring_time >= rewiring_period && !is_fast()) || is_fast())) {
         update_goal_posts(time);
         last_rewiring_time = 0;
         // put flag in spike processing to do synaptic rewiring

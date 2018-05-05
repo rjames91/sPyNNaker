@@ -1,7 +1,7 @@
 #ifndef _POPULATION_TABLE_H_
 #define _POPULATION_TABLE_H_
 
-#include <neuron-typedefs.h>
+#include <common/neuron-typedefs.h>
 
 //! \brief Sets up the table
 //! \param[in] table_address The address of the start of the table data
@@ -31,5 +31,8 @@ bool population_table_get_first_address(
 //! \return True if there is a row to read, False if not
 bool population_table_get_next_address(
     address_t* row_address, size_t* n_bytes_to_transfer);
+
+
+uint32_t population_table_get_ghost_pop_table_searches();
 
 #endif // _POPULATION_TABLE_H_

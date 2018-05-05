@@ -1,8 +1,8 @@
 #ifndef _SPIKE_PROCESSING_H_
 #define _SPIKE_PROCESSING_H_
 
-#include <neuron-typedefs.h>
-#include <in_spikes.h>
+#include <common/neuron-typedefs.h>
+#include <common/in_spikes.h>
 
 bool spike_processing_initialise(
     size_t row_max_n_bytes, uint mc_packet_callback_priority,
@@ -14,6 +14,8 @@ void spike_processing_finish_write(uint32_t process_id);
 //! \return the number of times the input buffer has overflowed
 uint32_t spike_processing_get_buffer_overflows();
 
+// Return the number of failed pop table searches
+uint32_t spike_processing_get_ghost_pop_table_searches();
 
 //! DMA buffer structure combines the row read from SDRAM with
 typedef struct dma_buffer {

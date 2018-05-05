@@ -1,5 +1,5 @@
-#include <population_table.h>
-#include <synapse_row.h>
+#include "population_table.h"
+#include <neuron/synapse_row.h>
 #include <debug.h>
 #include <string.h>
 
@@ -21,6 +21,8 @@ static uint32_t master_population_table_length;
 static address_and_row_length *address_list;
 static address_t synaptic_rows_base_address;
 static address_t direct_rows_base_address;
+
+static uint32_t ghost_pop_table_searches = 0;
 
 static uint32_t last_neuron_id = 0;
 static uint16_t next_item = 0;
@@ -180,6 +182,9 @@ bool population_table_get_first_address(
             imax = imid;
         }
     }
+
+    ghost_pop_table_searches ++;
+    log_info("Ghost searches: %u", ghost_pop_table_searches);
     log_debug(
         "spike %u (= %x): population not found in master population table",
         spike, spike);
@@ -242,4 +247,8 @@ bool population_table_get_next_address(
     profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_POP_TABLE_GET_NEXT);
 
     return is_valid;
+}
+
+uint32_t population_table_get_ghost_pop_table_searches(){
+	return ghost_pop_table_searches;
 }

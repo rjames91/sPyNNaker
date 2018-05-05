@@ -1,8 +1,8 @@
 #include "spike_processing.h"
-#include "population_table.h"
+#include "population_table/population_table.h"
 #include "synapse_row.h"
 #include "synapses.h"
-#include "synaptogenesis_dynamics.h"
+#include "structural_plasticity/synaptogenesis_dynamics.h"
 #include "./profile_tags.h"
 #include <simulation.h>
 #include <spin1_api.h>
@@ -229,7 +229,7 @@ void _dma_complete_callback(uint unused, uint tag) {
         // Process synaptic row, writing it back if it's the last time
         // it's going to be processed
         if (!synapses_process_synaptic_row(time, current_buffer->row,
-        	!subsequent_spikes, current_buffer_index)) {
+            !subsequent_spikes, current_buffer_index)) {
             log_error(
                 "Error processing spike 0x%.8x for address 0x%.8x"
                 "(local=0x%.8x)",
@@ -307,6 +307,12 @@ uint32_t spike_processing_get_buffer_overflows() {
     // Check for buffer overflow
     return in_spikes_get_n_buffer_overflows();
 }
+
+uint32_t spike_processing_get_ghost_pop_table_searches(){
+	return population_table_get_ghost_pop_table_searches();
+}
+
+
 
 //! \brief get the address of the circular buffer used for buffering received
 //! spikes before processing them
