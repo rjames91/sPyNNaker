@@ -11,9 +11,9 @@
 #include "threshold_types/threshold_type.h"
 #include "synapse_types/synapse_types.h"
 #include "plasticity/synapse_dynamics.h"
-#include "synaptogenesis_dynamics.h"
-#include <out_spikes.h>
-#include "recording.h"
+#include "structural_plasticity/synaptogenesis_dynamics.h"
+#include <common/out_spikes.h>
+#include <recording.h>
 #include <debug.h>
 #include <string.h>
 
@@ -583,10 +583,10 @@ void neuron_do_timestep_update(timer_t time) {
 
 
         for (int i = 0; i < NUM_EXCITATORY_RECEPTORS; i++){
-        	total_exc += exc_syn_input[i];
+            total_exc += exc_syn_input[i];
         }
         for (int i=0; i< NUM_INHIBITORY_RECEPTORS; i++){
-        	total_inh += inh_syn_input[i];
+            total_inh += inh_syn_input[i];
         }
 
         // record these neuron parameter. Just as cheap to set then to gate
@@ -596,9 +596,9 @@ void neuron_do_timestep_update(timer_t time) {
         // Perform conversion of g_syn to current, including evaluation of
         // voltage-dependent inputs
         input_type_convert_excitatory_input_to_current(
-        		exc_syn_input, input_type, voltage);
+                exc_syn_input, input_type, voltage);
         input_type_convert_inhibitory_input_to_current(
-        		inh_syn_input, input_type, voltage);
+                inh_syn_input, input_type, voltage);
 
         // Get external bias from any source of intrinsic plasticity
         input_t external_bias =
