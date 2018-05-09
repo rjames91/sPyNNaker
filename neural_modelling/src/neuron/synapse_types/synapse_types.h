@@ -61,4 +61,9 @@ static void synapse_types_print_parameters(
 //! \return Nothing
 static void synapse_types_print_input(synapse_param_pointer_t parameters);
 
+//! \brief returns the number of synaptse_type input saturations summed across
+//! all receptor types.
+//! \return saturation count.
+static uint32_t synapse_types_get_synaptic_input_saturations();
+
 #endif // _SYNAPSE_TYPES_H_

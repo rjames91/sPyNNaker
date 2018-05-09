@@ -29,6 +29,7 @@
 //---------------------------------------
 // Synapse parameters
 //---------------------------------------
+uint32_t input_saturations = 0;
 input_t excitatory_response[NUM_EXCITATORY_RECEPTORS];
 input_t inhibitory_response[NUM_INHIBITORY_RECEPTORS];
 
@@ -133,6 +134,10 @@ static inline void synapse_types_print_input(
 static inline void synapse_types_print_parameters(
         synapse_param_pointer_t parameter) {
     synapse_types_print_input(parameter);
+}
+
+uint32_t synapse_types_get_synaptic_input_saturations(){
+	return input_saturations;
 }
 
 #endif  // _SYNAPSE_TYPES_DELTA_IMPL_H_

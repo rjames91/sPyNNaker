@@ -451,6 +451,13 @@ uint32_t synapses_get_saturation_count() {
     return saturation_count;
 }
 
+//! \brief returns the number of synaptse_type input saturations summed across
+//! all receptor types.
+//! \return saturation count.
+uint32_t synapses_get_synapse_types_input_saturations(){
+	return synapse_types_get_synaptic_input_saturations();
+}
+
 //! \brief returns the counters for plastic and fixed pre synaptic events
 //! based on (if the model was compiled with SYNAPSE_BENCHMARK parameter) or
 //! returns 0
@@ -459,7 +466,6 @@ uint32_t synapses_get_pre_synaptic_events() {
     return (num_fixed_pre_synaptic_events +
             synapse_dynamics_get_plastic_pre_synaptic_events());
 }
-
 
 //! \brief  Searches the synaptic row for the the connection with the
 //!         specified post-synaptic id

@@ -23,6 +23,7 @@
 //---------------------------------------
 // Synapse parameters
 //---------------------------------------
+uint32_t input_saturations = 0;
 input_t excitatory_response[NUM_EXCITATORY_RECEPTORS];
 input_t inhibitory_response[NUM_INHIBITORY_RECEPTORS];
 
@@ -134,6 +135,10 @@ static inline void synapse_types_print_parameters(synapse_param_pointer_t parame
     log_debug("-------------------------------------\n");
     log_debug("exc_response  = %11.4k\n", parameter->exc.lin_buff * parameter->exc.exp_buff);
     log_debug("inh_response  = %11.4k\n", parameter->inh.lin_buff * parameter->inh.exp_buff);
+}
+
+static uint32_t synapse_types_get_synaptic_input_saturations(){
+	return input_saturations;
 }
 
 #endif // _ALPHA_SYNAPSE_H_

@@ -29,6 +29,7 @@
 //---------------------------------------
 // Synapse parameters
 //---------------------------------------
+uint32_t input_saturations = 0;
 input_t excitatory_response[NUM_EXCITATORY_RECEPTORS];
 input_t inhibitory_response[NUM_INHIBITORY_RECEPTORS];
 
@@ -175,6 +176,10 @@ static inline void synapse_types_print_parameters(
     log_info(
         "gsyn_inhibitory_initial_value = %11.4k\n",
         parameter->input_buffer_inhibitory_value);
+}
+
+static uint32_t synapse_types_get_synaptic_input_saturations(){
+	return input_saturations;
 }
 
 #endif  // _SYNAPSE_TYPES_DUAL_EXCITATORY_EXPONENTIAL_IMPL_H_

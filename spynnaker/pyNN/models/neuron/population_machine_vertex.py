@@ -42,7 +42,8 @@ class PopulationMachineVertex(
                ("SATURATION_COUNT", 1),
                ("BUFFER_OVERFLOW_COUNT", 2),
                ("CURRENT_TIMER_TIC", 3),
-               ("PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT", 4)])
+               ("PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT", 4),
+               ("SYNAPTIC_INPUT_SATURATION_COUNT", 5)])
 
     PROFILE_TAG_LABELS = {
         0: "TIMER",
@@ -116,6 +117,10 @@ class PopulationMachineVertex(
         n_plastic_saturations = provenance_data[
             self.EXTRA_PROVENANCE_DATA_ENTRIES.
             PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT.value]
+        n_synaptic_input_saturations = provenance_data[
+            self.EXTRA_PROVENANCE_DATA_ENTRIES.
+            SYNAPTIC_INPUT_SATURATION_COUNT.value]
+
 
         label, x, y, p, names = self._get_placement_details(placement)
 
@@ -158,6 +163,16 @@ class PopulationMachineVertex(
                 "spikes_per_second and / or ring_buffer_sigma values located "
                 "within the .spynnaker.cfg file.".format(
                     label, x, y, p, n_plastic_saturations))))
+        provenance_items.append(ProvenanceDataItem(
+            self._add_name(names,
+                           "Times_synaptic_input_saturated"),
+            n_synaptic_input_saturations,
+            report=n_saturations > 0,
+            message=(
+                "The synaptic input for {} on {}, {}, {} saturated {} times. "
+                "If this causes issue reduce the ring buffer to input left "
+                "shift value in the .spynnaker.cfg file.".format(
+                    label, x, y, p, n_synaptic_input_saturations))))
 
         return provenance_items
 

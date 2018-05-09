@@ -80,6 +80,10 @@ uint32_t synapses_get_saturation_count();
 //! \return the counter for plastic and fixed pre synaptic events or 0
 uint32_t synapses_get_pre_synaptic_events();
 
+//! \brief returns the number of synaptse_type input saturations summed across
+//! all receptor types.
+//! \return saturation count.
+uint32_t synapses_get_synapse_types_input_saturations();
 
 //------------------------------------------------------------------------------
 // Synaptic rewiring functions
