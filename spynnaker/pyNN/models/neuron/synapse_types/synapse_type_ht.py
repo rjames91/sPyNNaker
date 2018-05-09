@@ -369,7 +369,7 @@ class SynapseTypeHillTononi(AbstractSynapseType):
         return "AMPA", "NMDA", "GABA_A", "GABA_B"
 
     def get_n_synapse_type_parameters(self):
-        return self.get_n_synapse_types()* 6
+        return self.get_n_synapse_types() * 6
 
     @inject_items({"machine_time_step": "MachineTimeStep"})
     def get_synapse_type_parameters(self, machine_time_step):
@@ -447,7 +447,7 @@ class SynapseTypeHillTononi(AbstractSynapseType):
             NeuronParameter(self._inh2_b_response,
                             _COMB_EXP_TYPES.SYN_B_RESPONSE.data_type),
             NeuronParameter(self._inh2_b_B, _COMB_EXP_TYPES.SYN_B_B.data_type),
-            NeuronParameter(i2_b_decay, _COMB_EXP_TYPES.SYN_B_DECAY.data_type),
+            NeuronParameter(i2_b_decay, _COMB_EXP_TYPES.SYN_B_DECAY.data_type)
 
 
 
