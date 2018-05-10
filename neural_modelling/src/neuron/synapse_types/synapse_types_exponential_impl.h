@@ -82,6 +82,18 @@ static inline void synapse_types_shape_input(
 //! \return None
 static inline void _add_input_exp(exp_params_t* exp_params, input_t input){
 
+//	// Check for saturation of synaptic input
+//	int64_t accumulation = bitslk(exp_params->synaptic_input_value) +
+//			bitslk(decay_s1615(input, exp_params->init));
+//
+////	int64_t sat_test = accumulation & 0X100000;
+////	if (sat_test) {
+////		accumulation = sat_test - 1;
+////		input_saturations +=1;
+////	}
+//
+//	exp_params->synaptic_input_value = lkbits(accumulation);
+
 	exp_params->synaptic_input_value = exp_params->synaptic_input_value +
 			decay_s1615(input, exp_params->init);
 }
