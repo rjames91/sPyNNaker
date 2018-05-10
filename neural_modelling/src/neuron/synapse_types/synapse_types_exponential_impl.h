@@ -82,20 +82,27 @@ static inline void synapse_types_shape_input(
 //! \return None
 static inline void _add_input_exp(exp_params_t* exp_params, input_t input){
 
-//	// Check for saturation of synaptic input
-//	int64_t accumulation = bitslk(exp_params->synaptic_input_value) +
-//			bitslk(decay_s1615(input, exp_params->init));
-//
-////	int64_t sat_test = accumulation & 0X100000;
-////	if (sat_test) {
-////		accumulation = sat_test - 1;
-////		input_saturations +=1;
-////	}
-//
-//	exp_params->synaptic_input_value = lkbits(accumulation);
+	// Check for saturation of synaptic input
+	int64_t accumulation = bitslk(exp_params->synaptic_input_value) +
+			bitslk(decay_s1615(input, exp_params->init));
 
-	exp_params->synaptic_input_value = exp_params->synaptic_input_value +
-			decay_s1615(input, exp_params->init);
+//	accumulation = 1<<32;
+	uint64_t sat_test = accumulation & 0x100000000;
+	log_info("sat_test: %k", sat_test>>32);
+
+//	sat_test = 0k;
+//	if (REAL_COMPARE(sat_test, >, 0k)) {
+	if (sat_test) {
+		accumulation; // = sat_test - 1;
+		log_info("Accumulation: %k", accumulation>>32);
+		input_saturations += 1;
+	}
+
+	exp_params->synaptic_input_value = lkbits(accumulation);
+
+//  Original Update
+//	exp_params->synaptic_input_value = exp_params->synaptic_input_value +
+//			decay_s1615(input, exp_params->init);
 }
 
 //! \brief adds the inputs for a give timer period to a given neuron that is
@@ -109,12 +116,17 @@ static inline void synapse_types_add_neuron_input(
         index_t synapse_type_index, synapse_param_pointer_t parameter,
         input_t input) {
 
+	if (input>ZERO){
+		log_info("Input: %k", input);
+
+
     if (synapse_type_index == EXCITATORY) {
     	_add_input_exp(&parameter->exc, input);
 
     } else if (synapse_type_index == INHIBITORY) {
     	_add_input_exp(&parameter->inh, input);
     }
+	}
 }
 
 //! \brief extracts the excitatory input buffers from the buffers available
