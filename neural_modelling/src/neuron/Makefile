@@ -24,6 +24,8 @@ MODELS = IF_curr_exp \
          IF_cond_exp_stdp_mad_pair_additive_structural \
          IF_curr_exp_dv \
          IF_curr_exp_dv_plastic \
+         IF_curr_exp_dv_adapt \
+         IF_curr_exp_dv_adapt_plastic \
 
 
 

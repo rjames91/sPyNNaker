@@ -18,9 +18,12 @@ DV_DT_S = "dv_dt_slow"
 TAU_LP = "tau_low_pass"
 GAMMA = "gamma"
 GAMMA_COMP = "gamma_complement"
+V_MAX = "v_max"
+V_SPIKE = "v_spike"
 _CPU_RESET_CYCLES = 20  # pure guesswork
+_CPU_SPIKE_CYCLES = 10
 
-NUM_EXTRA_PARAMS = 8
+NUM_EXTRA_PARAMS = 10
 class _LIF_DV_TYPES(Enum):
     REFRACT_COUNT = (1, DataType.INT32)
     V_RESET = (2, DataType.S1615)
@@ -30,6 +33,8 @@ class _LIF_DV_TYPES(Enum):
     DV_DT_SLOW = (6, DataType.S1615)
     GAMMA = (7, DataType.S1615) # history weight for slow dV/dt
     GAMMA_COMP = (8, DataType.S1615)  # 1 - GAMMA
+    V_MAX = (9, DataType.S1615)
+    V_SPIKE = (10, DataType.S1615)
 
     def __new__(cls, value, data_type, doc=""):
         # pylint: disable=protected-access
@@ -50,7 +55,7 @@ class NeuronModelLeakyIntegrateAndFireDvDt(NeuronModelLeakyIntegrate):
 
     def __init__(
             self, n_neurons, v_init, v_rest, tau_m, cm, i_offset, v_reset,
-            tau_refrac, tau_low_pass):
+            tau_refrac, tau_low_pass, v_max=-28.0, v_spike=-30.0):
         # pylint: disable=too-many-arguments
         super(NeuronModelLeakyIntegrateAndFireDvDt, self).__init__(
             n_neurons, v_init, v_rest, tau_m, cm, i_offset)
@@ -64,9 +69,14 @@ class NeuronModelLeakyIntegrateAndFireDvDt(NeuronModelLeakyIntegrate):
         gamma = numpy.exp(-1.0/tau_low_pass)
         self._data[GAMMA] = gamma
         self._data[GAMMA_COMP] = 1. - gamma
-        self._my_units = {V_RESET: 'mV', V_PREV: 'mV', 
-                          TAU_REFRAC: 'ms', TAU_LP: 'ms',
-                          DV_DT: 'mV/ms', DV_DT_S: 'mV/ms'}
+        self._data[V_MAX] = v_max
+        self._data[V_SPIKE] = v_spike
+        self._my_units = {
+            V_RESET: 'mV', V_PREV: 'mV', 
+            TAU_REFRAC: 'ms', TAU_LP: 'ms',
+            DV_DT: 'mV/ms', DV_DT_S: 'mV/ms',
+            V_MAX: 'mV', V_SPIKE: 'mV',
+        }
 
     @property
     def v_prev(self):
@@ -135,6 +145,23 @@ class NeuronModelLeakyIntegrateAndFireDvDt(NeuronModelLeakyIntegrate):
     def tau_refrac(self, tau_refrac):
         self._data.set_value(key=TAU_REFRAC, value=tau_refrac)
 
+    @property
+    def v_max(self):
+        return self._data[V_MAX]
+
+    @v_max.setter
+    def v_max(self, value):
+        self._data.set_value(key=V_MAX, value=value)
+
+    @property
+    def v_spike(self):
+        return self._data[V_SPIKE]
+
+    @v_spike.setter
+    def v_spike(self, value):
+        self._data.set_value(key=V_SPIKE, value=value)
+
+
     @overrides(NeuronModelLeakyIntegrate.get_n_neural_parameters)
     def get_n_neural_parameters(self):
         return super(NeuronModelLeakyIntegrateAndFireDvDt, 
@@ -189,6 +216,11 @@ class NeuronModelLeakyIntegrateAndFireDvDt(NeuronModelLeakyIntegrate):
             NeuronParameter(self._data[GAMMA_COMP], 
                             _LIF_DV_TYPES.GAMMA_COMP.data_type),
 
+            NeuronParameter(self._data[V_MAX],
+                            _LIF_DV_TYPES.V_MAX.data_type),
+            NeuronParameter(self._data[V_SPIKE],
+                            _LIF_DV_TYPES.V_SPIKE.data_type),
+
         ])
         return params
 
@@ -202,7 +234,9 @@ class NeuronModelLeakyIntegrateAndFireDvDt(NeuronModelLeakyIntegrate):
     def get_n_cpu_cycles_per_neuron(self):
         # A guess - 20 for the reset procedure
         return super(NeuronModelLeakyIntegrateAndFireDvDt,
-                     self).get_n_cpu_cycles_per_neuron() + _CPU_RESET_CYCLES
+                     self).get_n_cpu_cycles_per_neuron() + \
+               _CPU_RESET_CYCLES + \
+               _CPU_SPIKE_CYCLES
 
     @overrides(NeuronModelLeakyIntegrate.get_units)
     def get_units(self, variable):

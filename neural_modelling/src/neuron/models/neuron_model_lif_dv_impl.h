@@ -45,6 +45,8 @@ typedef struct neuron_t {
     REAL     gamma;
     REAL     gamma_complement;
 
+    REAL     V_max;
+    REAL     V_spike;
 } neuron_t;
 
 typedef struct global_neuron_params_t {
