@@ -185,7 +185,8 @@ class SynapseDynamicsSTDP(
         n_synapse_type_bits = int(math.ceil(math.log(n_synapse_types, 2)))
         n_neuron_id_bits = int(
             math.ceil(math.log(post_vertex_slice.n_atoms, 2)))
-
+        n_neuron_id_mask = (1 << n_neuron_id_bits) - 1
+        
         dendritic_delays = (
             connections["delay"] * self._dendritic_delay_fraction)
         axonal_delays = (
@@ -199,8 +200,7 @@ class SynapseDynamicsSTDP(
              (12 + n_synapse_type_bits)) |
             (connections["synapse_type"].astype("uint16")
              << n_neuron_id_bits) |
-            ((connections["target"].astype("uint16") -
-              post_vertex_slice.lo_atom) & 0xFF))
+            ((connections["target"] - post_vertex_slice.lo_atom) & n_neuron_id_mask))
         fixed_plastic_rows = self.convert_per_connection_data_to_rows(
             connection_row_indices, n_rows,
             fixed_plastic.view(dtype="uint8").reshape((-1, 2)))
@@ -273,6 +273,7 @@ class SynapseDynamicsSTDP(
         n_synapse_type_bits = int(math.ceil(math.log(n_synapse_types, 2)))
         n_neuron_id_bits = int(
             math.ceil(math.log(post_vertex_slice.n_atoms, 2)))
+        n_neuron_id_mask = (1 << n_neuron_id_bits) - 1
 
         data_fixed = numpy.concatenate([
             fp_data[i].view(dtype="uint16")[0:fp_size[i]]
@@ -285,7 +286,8 @@ class SynapseDynamicsSTDP(
             data_fixed.size, dtype=self.NUMPY_CONNECTORS_DTYPE)
         connections["source"] = numpy.concatenate(
             [numpy.repeat(i, fp_size[i]) for i in range(len(fp_size))])
-        connections["target"] = (data_fixed & 0xFF) + post_vertex_slice.lo_atom
+        connections["target"] = (data_fixed & n_neuron_id_mask) + \
+                                post_vertex_slice.lo_atom
         connections["weight"] = synapse_structure.read_synaptic_data(
             fp_size, pp_without_headers)
         connections["delay"] = (data_fixed >> (n_neuron_id_bits
