@@ -571,9 +571,10 @@ class SynapticManager(object):
             self, spec, machine_vertex, machine_graph, graph_mapper,
             post_slices, post_slice_index, post_vertex_slice, input_type,
             machine_time_step):
+
         # Get the ring buffer shifts and scaling factors
         weight_scale = input_type.get_global_weight_scale()
-        ring_buffer_shifts = [14,14, 14]
+        ring_buffer_shifts = [14] * self.synapse_type.get_n_synapse_types()
 
 #         self._get_ring_buffer_to_input_left_shifts(
 #             machine_vertex, machine_graph, graph_mapper, post_slices,
@@ -596,6 +597,7 @@ class SynapticManager(object):
             for r in self._get_precision_based_weight_scale()])
 
         print "\n Receptor-based weight scales: {} \n".format(weight_scales)
+        print "Receptor-based input type factors: {} \n".format(self._get_SpiNNaker_scalars(ring_buffer_shifts))
         return weight_scales
 
     def _write_padding(
