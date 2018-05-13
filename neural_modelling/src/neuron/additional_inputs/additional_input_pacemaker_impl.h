@@ -2,7 +2,8 @@
 #define _ADDITIONAL_INPUT_PACEMAKER_H_
 
 #include "additional_input.h"
-
+#include "../profile_tags.h"
+#include <profiler.h>
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 
