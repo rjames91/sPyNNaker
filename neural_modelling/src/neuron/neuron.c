@@ -574,9 +574,9 @@ void neuron_do_timestep_update(timer_t time) {
         		// total_inh;
         		//additional_input->I_H;
 
-        // For recording and visualising threshold
-        // inputs_inhibitory->inputs[neuron_index].input = (threshold_type->threshold_value +
-        //        		threshold_type->threshold_resting);
+//        // For recording and visualising threshold
+//         inputs_inhibitory->inputs[neuron_index].input = (threshold_type->threshold_value +
+//                		threshold_type->threshold_resting);
 
         // Perform conversion of g_syn to current, including evaluation of
         // voltage-dependent inputs
