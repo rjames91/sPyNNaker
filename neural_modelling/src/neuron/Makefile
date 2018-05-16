@@ -26,6 +26,8 @@ MODELS = IF_curr_exp \
          IF_curr_exp_dv_plastic \
          IF_curr_exp_dv_adapt \
          IF_curr_exp_dv_adapt_plastic \
+         IF_curr_exp_nmda_dv_adapt \
+         IF_curr_exp_nmda_dv_adapt_plastic \
 
 
 
