@@ -25,7 +25,7 @@ class HillTononi(AbstractPopulationVertex):
         'tau_m': 20.0, 'cm': 1.0, 'v_rest': -65.0, 'v_reset': -65.0,
 
     # #### Threshold ####
-        'v_thresh': -55, 'v_thresh_resting': -50, 'v_thresh_tau':2,
+        'v_thresh': 0, 'v_thresh_resting': -50, 'v_thresh_tau':50,
         'v_thresh_Na_reversal':40,
 
     # ##### Synapse Type #####
@@ -60,7 +60,7 @@ class HillTononi(AbstractPopulationVertex):
         'e_to_t_on_tau_h': -4
         }
 
-    initialize_parameters = {'v_init': None}
+    initialize_parameters = {'v_init': -65}
 
     def __init__(
             self, n_neurons, spikes_per_second=AbstractPopulationVertex.

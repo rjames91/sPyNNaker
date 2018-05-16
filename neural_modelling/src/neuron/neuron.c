@@ -587,8 +587,9 @@ void neuron_do_timestep_update(timer_t time) {
 
         // Get external bias from any source of intrinsic plasticity
         input_t external_bias =
-            synapse_dynamics_get_intrinsic_bias(time, neuron_index) +
-			add_in;
+            synapse_dynamics_get_intrinsic_bias(time, neuron_index);
+        // remove this for now
+        // + add_in;
 
         // Update neuron parameters
         state_t result = neuron_model_state_update(

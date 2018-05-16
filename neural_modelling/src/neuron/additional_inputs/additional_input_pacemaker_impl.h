@@ -22,9 +22,38 @@ typedef struct additional_input_t {
     accum    e_to_t_on_tau_h;  // not used here
 } additional_input_t;
 
+// Variables to control 'patch clamp' tests
+static input_t local_v = -20;
+static uint32_t n_spikes = 0;
+
+static inline void _print_additional_input_params(additional_input_t* additional_input){
+	log_info("\n"
+			"m: %k, m_inf: %k, tau_m: %k, \n"
+			"h: %k, h_inf: %k, tau_h: %k, \n"
+			"g_H: %k, E_H: %k, dt = %k, \n"
+			" I_H = %k",
+			additional_input->m,
+			additional_input->m_inf,
+			additional_input->e_to_t_on_tau_m,
+			additional_input->h,
+			additional_input->h_inf,
+			additional_input->e_to_t_on_tau_h,
+			additional_input->g_H,
+			additional_input->E_H,
+			additional_input->dt,
+			additional_input->I_H);
+}
+
 static input_t additional_input_get_input_value_as_current(
         additional_input_pointer_t additional_input,
         state_t membrane_voltage) {
+
+//	log_info("membrane potential: %k", membrane_voltage);
+
+	// Hardcode membrane potential during tests:
+	membrane_voltage = local_v;
+	log_info("local membrane potential: %k", local_v);
+
 
     profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_INTRINSIC_CURRENT);
 
@@ -59,26 +88,19 @@ static input_t additional_input_get_input_value_as_current(
 
 static void additional_input_has_spiked(
         additional_input_pointer_t additional_input) {
-	// no action to be taken on spiking
+	n_spikes += 1;
+	log_info("number of post-synaptic spikes: %u", n_spikes);
+
+
+	if (n_spikes==1){
+		local_v = 30;
+	} else if (n_spikes==2){
+		local_v = 0;
+	}
+
+
 }
 
 
-static inline void _print_additional_input_params(additional_input_t* additional_input){
-	log_info("\n"
-			"m: %k, m_inf: %k, tau_m: %k, \n"
-			"h: %k, h_inf: %k, tau_h: %k, \n"
-			"g_H: %k, E_H: %k, dt = %k, \n"
-			" I_H = %k",
-			additional_input->m,
-			additional_input->m_inf,
-			additional_input->e_to_t_on_tau_m,
-			additional_input->h,
-			additional_input->h_inf,
-			additional_input->e_to_t_on_tau_h,
-			additional_input->g_H,
-			additional_input->E_H,
-			additional_input->dt,
-			additional_input->I_H);
-}
 
 #endif // _ADDITIONAL_INPUT_PACEMAKER_H_

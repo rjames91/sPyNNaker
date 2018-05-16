@@ -22,16 +22,32 @@ typedef struct threshold_type_t {
     //
 } threshold_type_t;
 
+static inline void _print_threshold_type_params(threshold_type_t* threshold_type){
+	   log_info("threshold_value: %k; \n"
+	    		"threshold_resting: %k; \n"
+	    		"Thereshold_decay: %k; \n"
+	    		"Threshold_Na_reversal: %k. \n",
+				threshold_type->threshold_value,
+				threshold_type->threshold_resting,
+				threshold_type->threshold_decay,
+				threshold_type->threshold_Na_reversal);
+}
+
 static inline bool threshold_type_is_above_threshold(state_t value,
                         threshold_type_pointer_t threshold_type) {
 
     profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_DYNAMIC_THRESHOLD);
-
+//    log_info("value = %k", value);
+//    _print_threshold_type_params(threshold_type);
+//    log_info("value - resting threshold = %k", value - threshold_type->threshold_resting);
+//    log_info("threshold instantaneous: %k", threshold_type->threshold_value);
 
 	// If neuron has spiked
 	if REAL_COMPARE((value - threshold_type->threshold_resting),
 			>=, (threshold_type->threshold_value
 			)) {
+
+		log_info("HAS FIRED!!!");
 
 		// Set threshold level to sodium reversal potential + threshold, so
 		// we can decay threshold value back to zero
@@ -56,15 +72,5 @@ static inline bool threshold_type_is_above_threshold(state_t value,
 
 }
 
-static inline void _print_threshold_type_params(threshold_type_t* threshold_type){
-	   log_info("threshold_value: %k; \n"
-	    		"threshold_resting: %k; \n"
-	    		"Thereshold_decay: %k; \n"
-	    		"Threshold_Na_reversal: %k. \n",
-				threshold_type->threshold_value,
-				threshold_type->threshold_resting,
-				threshold_type->threshold_decay,
-				threshold_type->threshold_Na_reversal);
-}
 
 #endif // _THRESHOLD_TYPE_HT_DYNAMIC_H_
