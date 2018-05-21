@@ -55,7 +55,7 @@ typedef enum extra_provenance_data_region_entries{
     SYNAPTIC_WEIGHT_SATURATION_COUNT = 1,
     INPUT_BUFFER_OVERFLOW_COUNT = 2,
     CURRENT_TIMER_TICK = 3,
-	PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT = 4
+	PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT = 4,
 	GHOST_POP_TABLE_SEARCHES = 5
 } extra_provenance_data_region_entries;
 
