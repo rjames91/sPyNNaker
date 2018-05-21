@@ -55,7 +55,8 @@ typedef enum extra_provenance_data_region_entries{
     SYNAPTIC_WEIGHT_SATURATION_COUNT = 1,
     INPUT_BUFFER_OVERFLOW_COUNT = 2,
     CURRENT_TIMER_TICK = 3,
-	GHOST_POP_TABLE_SEARCHES = 4
+	PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT = 4
+	GHOST_POP_TABLE_SEARCHES = 5
 } extra_provenance_data_region_entries;
 
 //! values for the priority for each callback
@@ -115,9 +116,11 @@ void c_main_store_provenance_data(address_t provenance_region){
     provenance_region[INPUT_BUFFER_OVERFLOW_COUNT] =
         spike_processing_get_buffer_overflows();
     provenance_region[CURRENT_TIMER_TICK] = time;
-    log_debug("finished other provenance data");
+    provenance_region[PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT] =
+    		synapse_dynamics_get_plastic_saturation_count();
     provenance_region[GHOST_POP_TABLE_SEARCHES]=
     	spike_processing_get_ghost_pop_table_searches();
+    log_debug("finished other provenance data");
 }
 
 //! \brief Initialises the model by reading in the regions and checking
