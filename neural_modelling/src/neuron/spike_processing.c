@@ -211,7 +211,7 @@ void _dma_complete_callback(uint unused, uint tag) {
     profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_DMA_SETUP_TO_CALLBACK);
     profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_DMA_CALLBACK);
 
-    log_debug("DMA transfer complete with tag %u", tag);
+    log_info("DMA transfer complete with tag %u", tag);
 
     // Get pointer to current buffer
     uint32_t current_buffer_index = buffer_being_read;

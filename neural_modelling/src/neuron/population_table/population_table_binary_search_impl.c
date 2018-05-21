@@ -184,8 +184,8 @@ bool population_table_get_first_address(
     }
 
     ghost_pop_table_searches ++;
-    log_info("Ghost searches: %u", ghost_pop_table_searches);
-    log_debug(
+    log_debug("Ghost searches: %u", ghost_pop_table_searches);
+    log_info(
         "spike %u (= %x): population not found in master population table",
         spike, spike);
 
@@ -201,6 +201,7 @@ bool population_table_get_next_address(
 
     // If there are no more items in the list, return false
     if (items_to_go <= 0) {
+    	log_debug("items to go is zero");
         profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_POP_TABLE_GET_NEXT);
         return false;
     }
@@ -221,6 +222,7 @@ bool population_table_get_next_address(
         } else {
 
             uint32_t row_length = _get_row_length(item);
+//            log_info("Items to go was not zero, but row length is: %u", row_length);
             if (row_length > 0) {
 
                 uint32_t block_address =
@@ -231,7 +233,7 @@ bool population_table_get_next_address(
 
                 *row_address = (address_t) (block_address + neuron_offset);
                 *n_bytes_to_transfer = stride * sizeof(uint32_t);
-                log_debug(
+                log_info(
                     "neuron_id = %u, block_address = 0x%.8x,"
                     "row_length = %u, row_address = 0x%.8x, n_bytes = %u",
                     last_neuron_id, block_address, row_length, *row_address,
@@ -245,6 +247,11 @@ bool population_table_get_next_address(
     } while (!is_valid && (items_to_go > 0));
 
     profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_POP_TABLE_GET_NEXT);
+
+    if (!is_valid){
+    	ghost_pop_table_searches += 1;
+    	log_debug("is valid: %u", is_valid);
+    }
 
     return is_valid;
 }
