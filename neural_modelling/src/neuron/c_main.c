@@ -257,13 +257,13 @@ void timer_callback(uint timer_count, uint unused) {
     //   from the circular buffer
     // If time == 0 as well as output == input == 0  then no rewire is
     //   supposed to happen. No spikes yet
-    log_debug("Timer tick %u \n", time);
+//    log_info("T: %U", time);
 
     /* if a fixed number of simulation ticks that were specified at startup
        then do reporting for finishing */
     if (infinite_run != TRUE && time >= simulation_ticks) {
 
-        log_debug("Completed a run");
+        log_info("Completed a run");
 
         // rewrite neuron params to sdram for reading out if needed
         address_t address = data_specification_get_data_address();
@@ -288,7 +288,7 @@ void timer_callback(uint timer_count, uint unused) {
         time -= 1;
 
         log_debug("Rewire tries = %d", count_rewires);
-
+        log_info("Exiting Completion of Callback");
         return;
     }
 
@@ -323,6 +323,7 @@ void timer_callback(uint timer_count, uint unused) {
     }
     // otherwise do synapse and neuron time step updates
     synapses_do_timestep_update(time);
+
     neuron_do_timestep_update(time);
 
     // trigger buffering_out_mechanism

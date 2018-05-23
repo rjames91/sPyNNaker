@@ -174,7 +174,8 @@ void _multicast_packet_received_callback(uint key, uint payload) {
 
     use(payload);
     any_spike = true;
-    log_debug("Received spike %x at %d, DMA Busy = %d", key, time, dma_busy);
+    log_info("Received spike %x at %d, DMA Busy = %d", key, time, dma_busy);
+    log_info("spike clock time: %u",tc[T1_COUNT]);
 
     // If there was space to add spike to incoming spike queue
     if (in_spikes_add_spike(key)) {
@@ -211,7 +212,7 @@ void _dma_complete_callback(uint unused, uint tag) {
     profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_DMA_SETUP_TO_CALLBACK);
     profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_DMA_CALLBACK);
 
-    log_info("DMA transfer complete with tag %u", tag);
+    log_debug("DMA transfer complete with tag %u", tag);
 
     // Get pointer to current buffer
     uint32_t current_buffer_index = buffer_being_read;

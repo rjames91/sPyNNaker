@@ -96,7 +96,7 @@ ifneq ($(SYNAPSE_DYNAMICS), $(SOURCE_DIR)/neuron/plasticity/synapse_dynamics_sta
 endif
 
 include $(SPINN_DIRS)/make/FrontEndCommon.mk
-FEC_OPT = $(OSPACE)
+FEC_OPT = $(OTIME)
 CFLAGS += -I$(NEURAL_MODELLING_DIRS)/src
 
 define synapse_type_rule
