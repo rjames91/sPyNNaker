@@ -174,8 +174,8 @@ void _multicast_packet_received_callback(uint key, uint payload) {
 
     use(payload);
     any_spike = true;
-    log_info("Received spike %x at %d, DMA Busy = %d", key, time, dma_busy);
-    log_info("spike clock time: %u",tc[T1_COUNT]);
+    log_debug("Received spike %x at %d, DMA Busy = %d", key, time, dma_busy);
+    log_debug("spike clock time: %u",tc[T1_COUNT]);
 
     // If there was space to add spike to incoming spike queue
     if (in_spikes_add_spike(key)) {

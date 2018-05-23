@@ -288,7 +288,7 @@ void timer_callback(uint timer_count, uint unused) {
         time -= 1;
 
         log_debug("Rewire tries = %d", count_rewires);
-        log_info("Exiting Completion of Callback");
+        log_info("Exiting - Completion of Callback");
         return;
     }
 
@@ -332,6 +332,8 @@ void timer_callback(uint timer_count, uint unused) {
     }
 
     profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_TIMER);
+
+    log_info("t_ev_ended: %u", tc[T1_COUNT]);
 }
 
 //! \brief The entry point for this model.
