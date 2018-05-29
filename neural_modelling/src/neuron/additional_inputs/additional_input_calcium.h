@@ -36,8 +36,8 @@ static input_t additional_input_get_input_value_as_current(
 
 	additional_input->e_to_t_on_tau_m = expk(-0.1k /
 	        (0.13k +
-	         0.22k * expk(0.05988k * (membrane_voltage+132k)) // 1/16.7=0.05988023952
-	        + expk(0.054945k * (membrane_voltage + 16.8k)))); // 1/18.2=0.05494505494
+	         0.22k / (expk(-0.05988k * (membrane_voltage+132k))                 // 1/16.7=0.05988023952
+	                  + expk(0.054945k * (membrane_voltage + 16.8k)))));         // 1/18.2=0.05494505494
 
     additional_input->e_to_t_on_tau_h = expk(-0.1k /
 	        (8.2k +
