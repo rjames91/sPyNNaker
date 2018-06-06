@@ -1,5 +1,5 @@
 from spynnaker.pyNN.models.neuron.neuron_models \
-    import NeuronModelLeakyIntegrateAndFireDvDt
+    import NeuronModelLeakyIntegrateAndFireDvDtNMDA
 from spynnaker.pyNN.models.neuron.synapse_types import SynapseTypeExponentialNMDA
 from spynnaker.pyNN.models.neuron.input_types import InputTypeCurrent
 from spynnaker.pyNN.models.neuron.threshold_types import ThresholdTypeAdaptive
@@ -67,7 +67,7 @@ class IFCurrExpDvDtAdaptiveNMDA(AbstractPopulationVertex):
         if v_spike <= max_thresh:
             v_spike = max_thresh + 1.
 
-        neuron_model = NeuronModelLeakyIntegrateAndFireDvDt(
+        neuron_model = NeuronModelLeakyIntegrateAndFireDvDtNMDA(
                         n_neurons, v_init, v_rest, tau_m, cm, i_offset,
                         v_reset, tau_refrac, tau_low_pass, v_max, v_spike)
         synapse_type = SynapseTypeExponentialNMDA(

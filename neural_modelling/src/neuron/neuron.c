@@ -223,13 +223,13 @@ bool _neuron_load_neuron_parameters(address_t address){
     memcpy(indexes_array, &address[next], n_neurons * sizeof(indexes_t));
     next += (n_neurons * sizeof(indexes_t)) / 4;
 
-    //for (index_t neuron_index = 0; neuron_index < n_neurons; neuron_index++) {
-    //    indexes_t indexes = &indexes_array[neuron_index];
-    //    log_debug("neuron = %u, spike index = %u, v index = %u,"
-    //        "exc index = %u, inh index = %u", neuron_index,
-    //        indexes->spike, indexes->v,
-    //        indexes->exc, indexes->inh);
-    //}
+    for (index_t neuron_index = 0; neuron_index < n_neurons; neuron_index++) {
+       indexes_t *indexes = &indexes_array[neuron_index];
+       log_debug("neuron = %u, spike index = %u, v index = %u,"
+           "exc index = %u, inh index = %u", neuron_index,
+           indexes->spike, indexes->v,
+           indexes->exc, indexes->inh);
+    }
 
     //log_debug("loading neuron global parameters");
     memcpy(global_parameters, &address[next], sizeof(global_neuron_params_t));

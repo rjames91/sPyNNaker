@@ -43,17 +43,10 @@ state_t neuron_model_state_update(
 
     // If outside of the refractory period
     if (neuron->refract_timer <= 0) {
-        REAL total_exc = 0;
-        REAL total_inh = 0;
-
-
-        total_exc += exc_input[0];
-        total_inh += inh_input[0];
-        
 
         // Get the input in nA
-        input_t input_this_timestep =
-            total_exc - total_inh + external_bias + neuron->I_offset;
+        input_t input_this_timestep = exc_input[0] - inh_input[0] + \
+            external_bias + neuron->I_offset;
 
         _lif_neuron_closed_form(
             neuron, neuron->V_membrane, input_this_timestep);

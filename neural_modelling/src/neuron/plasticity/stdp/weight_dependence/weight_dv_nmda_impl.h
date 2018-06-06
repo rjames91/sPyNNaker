@@ -1,5 +1,5 @@
-#ifndef _WEIGHT_ADDITIVE_DV_IMPL_H_
-#define _WEIGHT_ADDITIVE_DV_IMPL_H_
+#ifndef _WEIGHT_ADDITIVE_DV_NMDA_IMPL_H_
+#define _WEIGHT_ADDITIVE_DV_NMDA_IMPL_H_
 
 // Include generic plasticity maths functions
 #include <neuron/plasticity/stdp/maths.h>
@@ -68,12 +68,17 @@ static inline weight_t weight_get_final(weight_state_t new_state) {
     // **NOTE** A2+ and A2- are pre-scaled into weight format
     int32_t scale = new_state.weight_region->scale;
     
-    int32_t pre_scale = scale;
+    // int32_t pre_scale = scale;
     
-    if (new_state.dv_slow > 0 && \
-        new_state.nmda >= new_state.weight_region->boost_thresh){
+    if (new_state.dv_slow > 0){
+        if (new_state.nmda > new_state.weight_region->boost_thresh){
         // when lateral neurons sent sufficient spikes, add boost to LTP
-        scale += new_state.weight_region->boost;
+        // scale += new_state.weight_region->boost;
+            scale = new_state.weight_region->boost;
+        }
+        // else{
+            // scale = 0;
+        // }
     }
     
     // dv_slow needs to be scaled to STDP proportions
@@ -95,10 +100,10 @@ static inline weight_t weight_get_final(weight_state_t new_state) {
    // log_info("\told_weight:%u, dv_slow:%d, scaled dv_slow:%d, new_weight:%d",
              // new_state.initial_weight, new_state.dv_slow, scaled_dw,
              // new_weight);
+
     // log_info(
         // "FINAL = scale:%d, boost:%d, scale-post:%d, nmda:%d, thr:%d, "
-        // "dvSlow:%d, dw:%d, old_w:%d, new_w:%d"
-        // ,
+        // "dvSlow:%d, dw:%d, old_w:%d, new_w:%d",
         // pre_scale, new_state.weight_region->boost, scale,
         // new_state.nmda, new_state.weight_region->boost_thresh,
         // new_state.dv_slow, scaled_dw, new_state.initial_weight, new_weight);

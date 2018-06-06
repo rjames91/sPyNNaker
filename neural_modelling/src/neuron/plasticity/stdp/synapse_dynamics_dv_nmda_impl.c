@@ -164,6 +164,7 @@ bool synapse_dynamics_process_plastic_synapses(
                                                     _synapse_type_index_bits);
         uint32_t type = synapse_row_sparse_type(control_word, 
                                                     _synapse_index_bits);
+
         uint32_t index = (uint32_t)synapse_row_sparse_index(control_word,
                                                     _synapse_index_mask);
         uint32_t type_index = synapse_row_sparse_type_index(control_word,
