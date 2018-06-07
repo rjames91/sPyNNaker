@@ -68,6 +68,9 @@ typedef enum callback_priorities{
 #define NUMBER_OF_REGIONS_TO_RECORD 4
 
 // Globals
+uint32_t measurement_in[100];
+uint32_t measurement_out[100];
+uint32_t measure_index = 0 ;
 
 //! the current timer tick value
 //! the timer tick callback returning the same value.
@@ -248,6 +251,7 @@ void timer_callback(uint timer_count, uint unused) {
     use(timer_count);
     use(unused);
 
+
     profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_TIMER);
 
     time++;
@@ -257,13 +261,20 @@ void timer_callback(uint timer_count, uint unused) {
     //   from the circular buffer
     // If time == 0 as well as output == input == 0  then no rewire is
     //   supposed to happen. No spikes yet
-//    log_info("T: %U", time);
 
     /* if a fixed number of simulation ticks that were specified at startup
        then do reporting for finishing */
     if (infinite_run != TRUE && time >= simulation_ticks) {
 
         log_info("Completed a run");
+
+        for (int i=0; i< 100; i++){
+        	log_info("In: %u  Out: %u  Diff: %u",
+        			measurement_in[i],
+					measurement_out[i],
+					(measurement_in[i] - measurement_out[i]));
+        }
+
 
         // rewrite neuron params to sdram for reading out if needed
         address_t address = data_specification_get_data_address();
@@ -333,7 +344,7 @@ void timer_callback(uint timer_count, uint unused) {
 
     profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_TIMER);
 
-    log_info("t_ev_ended: %u", tc[T1_COUNT]);
+//    log_info("t_ev_ended: %u", tc[T1_COUNT]);
 }
 
 //! \brief The entry point for this model.

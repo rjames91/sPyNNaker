@@ -1,7 +1,7 @@
 // Profiler tags
 #define PROFILER_TIMER                    0
 #define PROFILER_SETUP_DMA                1
-#define PROFILER_INCOMING_SPIKE           2
+#define PROFILER_PACKET_RECEIVED_CALLBACK         2
 #define PROFILER_PROCESS_FIXED_SYNAPSES   3
 #define PROFILER_PROCESS_PLASTIC_SYNAPSES 4
 #define PROFILER_TIMER_NEURON_UPDATE      5
@@ -11,3 +11,13 @@
 #define PROFILER_POP_TABLE_GET_FIRST      9
 #define PROFILER_POP_TABLE_GET_NEXT      10
 #define PROFILER_SYNAPTIC_ROW            11
+
+
+//// Profile complete USER_CALLBACK and DMA_COMPLETE_CALLBACK
+//#define PROFILER_TIMER                    0
+//#define PROFILER_PACKET_RECEIVED_CALLBACK 1
+//#define PROFILER_TIMER_NEURON_UPDATE      2
+//#define PROFILER_TIMER_SYNAPSES_UPDATE    3
+//#define PROFILER_DMA_CALLBACK             4
+//#define PROFILER_USER_CALLBACK			  5
+

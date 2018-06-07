@@ -9,6 +9,10 @@
 #include <debug.h>
 #include <profiler.h>
 
+extern uint32_t measurement_in[100];
+extern uint32_t measurement_out[100];
+extern uint32_t measure_index;
+
 // The number of DMA Buffers to use
 #define N_DMA_BUFFERS 2
 
@@ -44,7 +48,7 @@ bool any_spike = false;
 static inline void _do_dma_read(
         address_t row_address, size_t n_bytes_to_transfer) {
 
-    profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_SETUP_DMA);
+//    profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_SETUP_DMA);
 
     // Write the SDRAM address of the plastic region and the
     // Key of the originating spike to the beginning of DMA buffer
@@ -61,13 +65,14 @@ static inline void _do_dma_read(
         n_bytes_to_transfer);
     next_buffer_to_fill = (next_buffer_to_fill + 1) % N_DMA_BUFFERS;
 
-    profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_SETUP_DMA);
+	measurement_in[measure_index] = tc[T2_COUNT];
+//    profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_SETUP_DMA);
 
     // The following measures actual DMA hardware module delay.
     // Profiler tag exit is placed in the dma callback
     // NOTE: This tag is likely to give incorrect results when DMA is setup
     // while another one is still executing - tag exits on a wrong callback.
-    profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_DMA_SETUP_TO_CALLBACK);
+//    profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_DMA_SETUP_TO_CALLBACK);
 }
 
 
@@ -143,7 +148,7 @@ void _setup_synaptic_dma_read() {
 
 static inline void _setup_synaptic_dma_write(uint32_t dma_buffer_index) {
 
-    profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_SETUP_DMA);
+//    profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_SETUP_DMA_WRITE);
 
     // Get pointer to current buffer
     dma_buffer *buffer = &dma_buffers[dma_buffer_index];
@@ -156,13 +161,14 @@ static inline void _setup_synaptic_dma_write(uint32_t dma_buffer_index) {
     log_debug("Writing back %u bytes of plastic region to %08x",
               n_plastic_region_bytes, buffer->sdram_writeback_address + 1);
 
+
     // Start transfer
     spin1_dma_transfer(
         DMA_TAG_WRITE_PLASTIC_REGION, buffer->sdram_writeback_address + 1,
         synapse_row_plastic_region(buffer->row),
         DMA_WRITE, n_plastic_region_bytes);
 
-    profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_SETUP_DMA);
+//    profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_SETUP_DMA_WRITE);
 }
 
 
@@ -170,7 +176,9 @@ static inline void _setup_synaptic_dma_write(uint32_t dma_buffer_index) {
 
 // Called when a multicast packet is received
 void _multicast_packet_received_callback(uint key, uint payload) {
-    profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_INCOMING_SPIKE);
+//    profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_PACKET_RECEIVED_CALLBACK);
+
+
 
     use(payload);
     any_spike = true;
@@ -187,6 +195,7 @@ void _multicast_packet_received_callback(uint key, uint payload) {
             log_debug("Sending user event for new spike");
             if (spin1_trigger_user_event(0, 0)) {
                 dma_busy = true;
+
             } else {
                 log_debug("Could not trigger user event\n");
             }
@@ -195,22 +204,26 @@ void _multicast_packet_received_callback(uint key, uint payload) {
         log_debug("Could not add spike");
     }
 
-    profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_INCOMING_SPIKE);
+//    profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_PACKET_RECEIVED_CALLBACK);
 }
 
 // Called when a user event is received
 void _user_event_callback(uint unused0, uint unused1) {
     use(unused0);
     use(unused1);
+//    log_info("TC: %u", tc[T1_COUNT]);
+//    profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_USER_CALLBACK);
     _setup_synaptic_dma_read();
+//    profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_USER_CALLBACK);
 }
 
 // Called when a DMA completes
 void _dma_complete_callback(uint unused, uint tag) {
     use(unused);
-
-    profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_DMA_SETUP_TO_CALLBACK);
-    profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_DMA_CALLBACK);
+    measurement_out[measure_index] = tc[T2_COUNT];
+//            log_info("M_index: %u", measure_index);
+    measure_index+=1;
+//    profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_DMA_SETUP_TO_CALLBACK);
 
     log_debug("DMA transfer complete with tag %u", tag);
 
@@ -222,8 +235,10 @@ void _dma_complete_callback(uint unused, uint tag) {
     bool subsequent_spikes;
     do {
 
+
+//    profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_DMA_CALLBACK);
         // Are there any more incoming spikes from the same pre-synaptic
-        // neuron?
+        // neuron? - Why do we do this?
         subsequent_spikes = in_spikes_is_next_spike_equal(
             current_buffer->originating_spike);
 
@@ -246,12 +261,18 @@ void _dma_complete_callback(uint unused, uint tag) {
 
             rt_error(RTE_SWERR);
         }
+
+//    profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_DMA_CALLBACK);
     } while (subsequent_spikes);
+
+
 
     // Start the next DMA transfer, so it is complete when we are finished
     _setup_synaptic_dma_read();
 
-    profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_DMA_CALLBACK);
+//    profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_DMA_CALLBACK);
+
+//    log_info("TC: %u", tc[T1_COUNT]);
 }
 
 

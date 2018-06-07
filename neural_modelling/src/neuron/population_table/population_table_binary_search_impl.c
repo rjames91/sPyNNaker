@@ -144,7 +144,7 @@ bool population_table_initialise(
 bool population_table_get_first_address(
         spike_t spike, address_t* row_address, size_t* n_bytes_to_transfer) {
 
-    profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_POP_TABLE_GET_FIRST);
+//    profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_POP_TABLE_GET_FIRST);
 
     uint32_t imin = 0;
     uint32_t imax = master_population_table_length;
@@ -168,7 +168,7 @@ bool population_table_get_first_address(
                 "spike = %08x, entry_index = %u, start = %u, count = %u",
                 spike, imid, next_item, items_to_go);
 
-            profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_POP_TABLE_GET_FIRST);
+//            profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_POP_TABLE_GET_FIRST);
 
             return population_table_get_next_address(
                 row_address, n_bytes_to_transfer);
@@ -189,7 +189,7 @@ bool population_table_get_first_address(
         "spike %u (= %x): population not found in master population table",
         spike, spike);
 
-    profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_POP_TABLE_GET_FIRST);
+//    profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_POP_TABLE_GET_FIRST);
 
     return false;
 }
@@ -197,12 +197,12 @@ bool population_table_get_first_address(
 bool population_table_get_next_address(
         address_t* row_address, size_t* n_bytes_to_transfer) {
 
-    profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_POP_TABLE_GET_NEXT);
+//    profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_POP_TABLE_GET_NEXT);
 
     // If there are no more items in the list, return false
     if (items_to_go <= 0) {
     	log_debug("items to go is zero");
-        profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_POP_TABLE_GET_NEXT);
+//        profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_POP_TABLE_GET_NEXT);
         return false;
     }
 
@@ -246,7 +246,7 @@ bool population_table_get_next_address(
         items_to_go -= 1;
     } while (!is_valid && (items_to_go > 0));
 
-    profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_POP_TABLE_GET_NEXT);
+//    profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_POP_TABLE_GET_NEXT);
 
     if (!is_valid){
     	ghost_pop_table_searches += 1;

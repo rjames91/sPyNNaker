@@ -14,6 +14,11 @@
     #include "profile_tags.h"
 #endif
 
+
+extern uint32_t measurement_in[100];
+extern uint32_t measurement_out[100];
+extern uint32_t measure_index;
+
 // Globals required for synapse benchmarking to work.
 uint32_t  num_fixed_pre_synaptic_events = 0;
 
@@ -163,6 +168,8 @@ static inline void _print_inputs() {
 // be put into the ring buffer.
 static inline void _process_fixed_synapses(
         address_t fixed_region_address, uint32_t time) {
+
+
     register uint32_t *synaptic_words = synapse_row_fixed_weight_controls(
         fixed_region_address);
     register uint32_t fixed_synapse = synapse_row_num_fixed_synapses(
@@ -203,7 +210,10 @@ static inline void _process_fixed_synapses(
 
         // Store saturated value back in ring-buffer
         ring_buffers[ring_buffer_index] = accumulation;
+
+
     }
+
 }
 
 //! private method for doing output debug data on the synapses
@@ -337,7 +347,7 @@ void synapses_do_timestep_update(timer_t time) {
     _print_ring_buffers(time);
 
     // Disable interrupts to stop DMAs interfering with the ring buffers
-    uint32_t state = spin1_irq_disable();
+//    uint32_t state = spin1_irq_disable();
 
     // Transfer the input from the ring buffers into the input buffers
     for (uint32_t neuron_index = 0; neuron_index < n_neurons;
@@ -375,7 +385,7 @@ void synapses_do_timestep_update(timer_t time) {
     _print_inputs();
 
     // Re-enable the interrupts
-    spin1_mode_restore(state);
+//    spin1_mode_restore(state);
 
     profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_TIMER_SYNAPSES_UPDATE);
 }
@@ -421,10 +431,16 @@ bool synapses_process_synaptic_row(uint32_t time, synaptic_row_t row,
     // that the DMA controller is ready to read next synaptic row afterwards
     profiler_write_entry_disable_irq_fiq(
              PROFILER_ENTER | PROFILER_PROCESS_FIXED_SYNAPSES);
+
+//    log_info("proc_row: %u", tc[T1_COUNT]);
     _process_fixed_synapses(fixed_region_address, time);
+
+//    log_info("aftp_row: %u", tc[T1_COUNT]);
+
+
     profiler_write_entry_disable_irq_fiq(
              PROFILER_EXIT | PROFILER_PROCESS_FIXED_SYNAPSES);
-    //}
+
 
     profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_SYNAPTIC_ROW);
     return true;

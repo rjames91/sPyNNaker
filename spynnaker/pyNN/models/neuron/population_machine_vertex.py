@@ -59,6 +59,16 @@ class PopulationMachineVertex(
        10: "POP_TABLE_GET_NEXT",
        11: "SYNAPTIC_ROW"}
 
+#     PROFILE_TAG_LABELS = {
+#         0: "TIMER",
+#         1: "PACKET_RECEIVED_CALLBACK",
+#         2: "TIMER_NEURON_UPDATE",
+#         3: "TIMER_SYNAPSES_UPDATE",
+#         4: "DMA_CALLBACK",
+#         5: "USER_CALLBACK"}
+
+
+
     N_ADDITIONAL_PROVENANCE_DATA_ITEMS = len(EXTRA_PROVENANCE_DATA_ENTRIES)
 
     def __init__(
