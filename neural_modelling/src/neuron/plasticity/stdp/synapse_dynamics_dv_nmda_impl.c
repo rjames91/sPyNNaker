@@ -239,6 +239,7 @@ void synapse_dynamics_print_plastic_synapses(
     use(plastic_region_address);
     use(fixed_region_address);
     use(ring_buffer_to_input_buffer_left_shifts);
+    
 #if LOG_LEVEL >= LOG_DEBUG
 
     // Extract separate arrays of weights (from plastic region),
@@ -261,17 +262,18 @@ void synapse_dynamics_print_plastic_synapses(
         // Get next weight and control word (auto incrementing control word)
         uint32_t weight = *plastic_words++;
         uint32_t control_word = *control_words++;
-        uint32_t synapse_type = synapse_row_sparse_type(control_word);
+        uint32_t synapse_type = synapse_row_sparse_type(control_word,_synapse_type_index_mask);
 
         log_debug("%08x [%3d: (w: %5u (=", control_word, i, weight);
         synapses_print_weight(
             weight, ring_buffer_to_input_buffer_left_shifts[synapse_type]);
         log_debug("nA) d: %2u, %s, n = %3u)] - {%08x %08x}\n",
-                  synapse_row_sparse_delay(control_word),
+                  synapse_row_sparse_delay(control_word, _synapse_type_index_bits),
                   synapse_types_get_type_char(synapse_row_sparse_type(
-                                             control_word)),
-                  synapse_row_sparse_index(control_word), SYNAPSE_DELAY_MASK,
-                  SYNAPSE_TYPE_INDEX_BITS);
+                                             control_word,_synapse_type_index_mask)),
+                  synapse_row_sparse_index(control_word, _synapse_index_mask), 
+                  SYNAPSE_DELAY_MASK,
+                  _synapse_type_index_bits);
     }
 #endif // LOG_LEVEL >= LOG_DEBUG
 }

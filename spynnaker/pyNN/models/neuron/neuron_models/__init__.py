@@ -8,6 +8,10 @@ from .neuron_model_leaky_integrate_and_fire_dv \
 from .neuron_model_leaky_integrate_and_fire_dv_nmda \
                         import NeuronModelLeakyIntegrateAndFireDvDtNMDA
 
+
+from .neuron_model_izh_dv import NeuronModelIzhDvDt
+from .neuron_model_izh_dv_nmda import NeuronModelIzhDvDtNMDA
+
 __all__ = ["AbstractNeuronModel", "NeuronModelIzh",
            "NeuronModelLeakyIntegrate", "NeuronModelLeakyIntegrateAndFire",
            "NeuronModelLeakyIntegrateAndFireDvDt",

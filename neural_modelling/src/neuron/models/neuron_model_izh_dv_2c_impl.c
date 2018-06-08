@@ -1,4 +1,4 @@
-#include "neuron_model_izh_impl.h"
+#include "neuron_model_izh_dv_2c_impl.h"
 
 #include <debug.h>
 
@@ -64,15 +64,15 @@ static inline void _rk2_kernel_midpoint(REAL h, neuron_pointer_t neuron,
 
 void update_dv_dt(neuron_pointer_t neuron){
     // voltage change this step
-    neuron->dV_dt = neuron->V_membrane - neuron->V_prev;
-    neuron->V_prev = neuron->V_membrane;
+    neuron->dV_dt = neuron->V - neuron->V_prev;
+    neuron->V_prev = neuron->V;
 
     // voltage change - filtered
     neuron->dV_dt_slow = ((neuron->dV_dt_slow)*(neuron->gamma)) + \
                          ((neuron->dV_dt)*(neuron->gamma_complement));
 
    // log_info("V, dv, dvs  = %11.6k, %11.6k, %11.6k",
-           // neuron->V_membrane, neuron->dV_dt, neuron->dV_dt_slow);
+           // neuron->V, neuron->dV_dt, neuron->dV_dt_slow);
 }
 
 
@@ -90,11 +90,8 @@ state_t neuron_model_state_update(
     REAL total_inh = 0;
 
 
-    total_exc = exc_input[i];
-
-    for (int i =0; i<num_inhibitory_inputs; i++){
-        total_inh += inh_input[i];
-    }
+    total_exc = exc_input[0];
+    total_inh = inh_input[0];
 
     input_t input_this_timestep = total_exc - total_inh
                                   + external_bias + neuron->I_offset;
@@ -102,6 +99,13 @@ state_t neuron_model_state_update(
     // the best AR update so far
     _rk2_kernel_midpoint(neuron->this_h, neuron, input_this_timestep);
     neuron->this_h = global_params->machine_timestep_ms;
+
+    neuron->V2_membrane = exc_input[1] - inh_input[1];
+        
+    update_dv_dt(neuron);
+    
+    // log_info("V, dvS, V2  = %11.6k, %11.6k, %11.6k",
+        // neuron->V, neuron->dV_dt_slow, neuron->V2_membrane );
 
     return neuron->V;
 }
@@ -122,6 +126,7 @@ state_t neuron_model_get_membrane_voltage(neuron_pointer_t neuron) {
     return neuron->V;
 }
 
+
 void neuron_model_print_state_variables(restrict neuron_pointer_t neuron) {
     log_debug("V = %11.4k ", neuron->V);
     log_debug("U = %11.4k ", neuron->U);
@@ -133,5 +138,14 @@ void neuron_model_print_parameters(restrict neuron_pointer_t neuron) {
     log_debug("C = %11.4k ", neuron->C);
     log_debug("D = %11.4k ", neuron->D);
 
-    log_debug("I = %11.4k \n", neuron->I_offset);
+    log_debug("I = %11.4k ", neuron->I_offset);
+    
+    log_debug("V_prev = %11.4k ", neuron->V_prev);
+    log_debug("dv = %11.4k ", neuron->dV_dt);
+    log_debug("dvS = %11.4k ", neuron->dV_dt_slow);
+    log_debug("G = %11.4k ", neuron->gamma);
+    log_debug("1-G = %11.4k ", neuron->gamma_complement);
+    log_debug("V2 = %11.4k \n", neuron->V2_membrane);
+
+    
 }

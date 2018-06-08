@@ -264,7 +264,7 @@ bool synapses_initialise(
         ring_buffer_to_input_left_shifts[synapse_index] =
             synapse_params_address[
                 ring_buffer_input_left_shifts_base + synapse_index];
-        log_debug("synapse type %s, ring buffer to input left shift %u",
+        log_info("synapse type %s, ring buffer to input left shift %u",
                  synapse_types_get_type_char(synapse_index),
                  ring_buffer_to_input_left_shifts[synapse_index]);
     }
@@ -297,7 +297,6 @@ bool synapses_initialise(
     }
     *indirect_synapses_address = &(synaptic_matrix_address[1]);
 
-    log_debug("synapses_initialise: completed successfully");
     _print_synapse_parameters();
 
     *neuron_synapse_shaping_params_value = neuron_synapse_shaping_params;
@@ -325,6 +324,8 @@ bool synapses_initialise(
     synapse_type_index_mask = (1 << synapse_type_index_bits) - 1;
     synapse_index_bits = log_n_neurons;
     synapse_index_mask = (1 << synapse_index_bits) - 1;
+
+    log_debug("synapses_initialise: completed successfully");
 
     return true;
 }

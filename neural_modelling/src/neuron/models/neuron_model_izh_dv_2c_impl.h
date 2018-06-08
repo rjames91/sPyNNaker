@@ -35,6 +35,8 @@ typedef struct neuron_t {
     REAL     gamma_complement;
 
     REAL     V2_membrane;
+    
+    
 
 } neuron_t;
 
