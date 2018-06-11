@@ -405,6 +405,7 @@ void synaptogenesis_dynamics_rewire(uint32_t time)
         // Identify pop, subpop and lo and hi atoms
         // Amazing linear search inc.
         // Loop over all populations
+        bool spike_found = false;
         for (uint i=0; i< rewiring_data.pre_pop_info_table.no_pre_pops; i++) {
 	    subpopulation_info_t *preapppop_info =
 		    &rewiring_data.pre_pop_info_table.subpop_info[i];
@@ -420,8 +421,13 @@ void synaptogenesis_dynamics_rewire(uint32_t time)
                     pre_app_pop = i;
                     pre_sub_pop = subpop_index;
                     choice = _spike & ~kai->mask;
+                    spike_found = true;
                 }
             }
+        }
+        if (!spike_found){
+        _setup_synaptic_dma_read();
+        return;
         }
     } else if (!element_exists && rewiring_data.random_partner) {
 	pre_app_pop = ulrbits(mars_kiss64_seed(rewiring_data.local_seed))
@@ -457,7 +463,7 @@ void synaptogenesis_dynamics_rewire(uint32_t time)
 
     if (!population_table_get_first_address(_spike, &synaptic_row_address,
 	    &n_bytes)) {
-        log_error("FAIL@key %d", _spike);
+        log_error("FAIL@key %d ee %d", _spike, element_exists);
         rt_error(RTE_SWERR);
     }
 
