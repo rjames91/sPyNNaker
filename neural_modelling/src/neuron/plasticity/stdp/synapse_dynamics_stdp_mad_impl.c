@@ -86,15 +86,10 @@ static inline final_state_t _plasticity_update_synapse(
         window_begin_time, window_end_time, post_window.prev_time,
         post_window.num_events);
 
-    // print_event_history(post_event_history);
-    // print_delayed_window_events(post_event_history, window_begin_time,
-    //		window_end_time, delay_dendritic);
-
     // Process events in post-synaptic window
     while (post_window.num_events > 0) {
         const uint32_t delayed_post_time = *post_window.next_time
-//                                           + delay_dendritic;
-                                           + 0;
+                                           + delay_dendritic;
         log_debug("\t\tApplying post-synaptic event at delayed time:%u\n",
               delayed_post_time);
 
@@ -217,7 +212,7 @@ address_t synapse_dynamics_initialise(
 
 bool synapse_dynamics_process_plastic_synapses(
         address_t plastic_region_address, address_t fixed_region_address,
-        weight_t *ring_buffers, uint32_t time) {
+        weight_t *ring_buffers, uint32_t time, uint32_t *saturation_count) {
 
     // Extract separate arrays of plastic synapses (from plastic region),
     // Control words (from fixed region) and number of plastic synapses
@@ -276,8 +271,28 @@ bool synapse_dynamics_process_plastic_synapses(
         // Add weight to ring-buffer entry
         // **NOTE** Dave suspects that this could be a
         // potential location for overflow
-        ring_buffers[ring_buffer_index] += synapse_structure_get_final_weight(
+        //ring_buffers[ring_buffer_index] += synapse_structure_get_final_weight(
+        //    final_state);
+
+        uint32_t accumulation = ring_buffers[ring_buffer_index] + synapse_structure_get_final_weight(
             final_state);
+
+        // If 17th bit is set, saturate accumulator at UINT16_MAX (0xFFFF)
+        // **NOTE** 0x10000 can be expressed as an ARM literal,
+        //          but 0xFFFF cannot.  Therefore, we use (0x10000 - 1)
+        //          to obtain this value
+
+        //the cause of overflow here is determined by your maximum individual stdp weight
+        //as this is scaled by our scaling factor and the individual final weights are capped
+
+        uint32_t sat_test = accumulation & 0x10000;
+        if (sat_test) {
+            accumulation = 0xFFFF;//sat_test - 1;
+            *saturation_count += 1;
+        }
+
+        // Store saturated value back in ring-buffer
+        ring_buffers[ring_buffer_index] = accumulation;
 
         // Write back updated synaptic word to plastic region
         *plastic_words++ = synapse_structure_get_final_synaptic_word(

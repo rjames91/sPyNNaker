@@ -10,6 +10,13 @@ static inline void _lif_neuron_closed_form(
 
     // update membrane voltage
     neuron->V_membrane = alpha - (neuron->exp_TC * (alpha - V_prev));
+
+    //say V-prev is V_rest then the max alpha to generate an increase to threshold can be calculated
+    // when tau_m = 2 exp_tc = exp(-1/2) v_rest=-65 v_thresh = -55.4
+    //alpha_spike_from_rest = (exp_tc*v_rest + v_thresh)/(1-exp_tc) = 131.565
+    //when C_mem=0.25 and tau_m=2 R_mem=8
+    //the max input this time_step to produce a super threshold v_mem is therefore:
+    // input_this_time_max = (alpha_spike_from_rest-v_rest)/R_mem = 24.57 ~= 25
 }
 
 void neuron_model_set_global_neuron_params(
@@ -40,9 +47,13 @@ state_t neuron_model_state_update(
 			total_inh += inh_input[i];
 		}
         // Get the input in nA
-        input_t input_this_timestep =
-            total_exc - total_inh + external_bias + neuron->I_offset;
-
+       input_t input_this_timestep;
+       long accum check = total_exc - total_inh + external_bias + neuron->I_offset;
+       if (check<=150) input_this_timestep = check;
+       else input_this_timestep = 150k;
+       /* input_t input_this_timestep =
+            total_exc - total_inh + external_bias + neuron->I_offset;*/
+        //if (input_this_timestep<0.0)while(1){}
         _lif_neuron_closed_form(
             neuron, neuron->V_membrane, input_this_timestep);
     } else {

@@ -370,7 +370,7 @@ bool synapses_process_synaptic_row(uint32_t time, synaptic_row_t row,
         profiler_write_entry_disable_fiq(
             PROFILER_ENTER | PROFILER_PROCESS_PLASTIC_SYNAPSES);
         if (!synapse_dynamics_process_plastic_synapses(plastic_region_address,
-                fixed_region_address, ring_buffers, time)) {
+                fixed_region_address, ring_buffers, time,&saturation_count)) {
             return false;
         }
         profiler_write_entry_disable_fiq(
