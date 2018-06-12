@@ -238,8 +238,8 @@ bool synapses_initialise(
 
         // Check for success
         if (neuron_synapse_shaping_params == NULL) {
-            log_error("Cannot allocate neuron synapse parameters"
-                      "- Out of DTCM");
+//            log_error("Cannot allocate neuron synapse parameters"
+//                      "- Out of DTCM");
             return false;
         }
 
@@ -279,7 +279,7 @@ bool synapses_initialise(
             spin1_malloc(direct_matrix_size);
 
         if (*direct_synapses_address == NULL) {
-            log_error("Not enough memory to allocate direct matrix");
+//            log_error("Not enough memory to allocate direct matrix");
             return false;
         }
         log_debug(
