@@ -24,6 +24,7 @@ static uint32_t _synapse_type_index_mask;
 static uint32_t _synapse_delay_index_type_bits;
 
 uint32_t num_plastic_pre_synaptic_events = 0;
+uint32_t plastic_saturation_count = 0;
 
 post_event_history_t *post_event_history;
 
@@ -184,11 +185,14 @@ bool synapse_dynamics_process_plastic_synapses(
         // **NOTE** Dave suspects that this could be a potential location
         // for overflow
         uint32_t accumulation = ring_buffers[ring_buffer_index] +
-                                synapse_structure_get_final_weight(final_state);
+        		synapse_structure_get_final_weight(final_state);
+
         uint32_t sat_test = accumulation & 0x10000;
-        if (sat_test) {
-            accumulation = sat_test - 1;
+        if (sat_test){
+        	accumulation = sat_test - 1;
+        	plastic_saturation_count += 1;
         }
+
         ring_buffers[ring_buffer_index] = accumulation;
 
         // Write back updated synaptic word to plastic region
@@ -278,6 +282,9 @@ void synapse_dynamics_print_plastic_synapses(
 //! \return counters for plastic pre synaptic events or 0
 uint32_t synapse_dynamics_get_plastic_pre_synaptic_events(){
     return num_plastic_pre_synaptic_events;
+}
+uint32_t synapse_dynamics_get_plastic_saturation_count(){
+	return plastic_saturation_count;
 }
 
 void synapse_dynamics_set_neuron_array(neuron_pointer_t neuron_array){
