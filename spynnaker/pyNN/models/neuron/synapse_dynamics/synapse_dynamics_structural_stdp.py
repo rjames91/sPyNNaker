@@ -74,6 +74,7 @@ class SynapseDynamicsStructuralSTDP(AbstractSynapseDynamicsStructural,
     def __init__(self, stdp_model=CommonSP.default_parameters['stdp_model'],
                  f_rew=CommonSP.default_parameters['f_rew'],
                  weight=CommonSP.default_parameters['weight'],
+                 max_weight=CommonSP.default_parameters['max_weight'],
                  delay=CommonSP.default_parameters['delay'],
                  s_max=CommonSP.default_parameters['s_max'],
                  sigma_form_forward=CommonSP.default_parameters[
@@ -102,7 +103,7 @@ class SynapseDynamicsStructuralSTDP(AbstractSynapseDynamicsStructural,
         AbstractSynapseDynamicsStructural.__init__(self)
 
         self._common_sp = CommonSP(
-            stdp_model=self, f_rew=f_rew, weight=weight,
+            stdp_model=self, f_rew=f_rew, weight=weight, max_weight=max_weight,
             delay=delay, s_max=s_max,
             sigma_form_forward=sigma_form_forward,
             sigma_form_lateral=sigma_form_lateral,

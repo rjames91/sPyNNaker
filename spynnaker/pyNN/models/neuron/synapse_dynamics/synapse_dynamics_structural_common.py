@@ -57,6 +57,8 @@ class SynapseDynamicsStructuralCommon(AbstractSynapseDynamicsStructural):
         "_p_rew",
         # Initial weight assigned to a newly formed connection
         "_initial_weight",
+        # Max weight allowed per connection (used for removals)
+        "_max_weight",
         # Delay assigned to a newly formed connection
         "_initial_delay",
         # Maximum fan-in per target layer neuron
@@ -100,9 +102,9 @@ class SynapseDynamicsStructuralCommon(AbstractSynapseDynamicsStructural):
         "_lat_distance_probabilities"]
 
     default_parameters = {
-        'stdp_model': None, 'f_rew': 10 ** 4, 'weight': 0, 'delay': 1,
-        's_max': 32, 'sigma_form_forward': 2.5, 'sigma_form_lateral': 1,
-        'p_form_forward': 0.16, 'p_form_lateral': 1.,
+        'stdp_model': None, 'f_rew': 10 ** 4, 'weight': 0, 'max_weight':0,
+        'delay': 1, 's_max': 32, 'sigma_form_forward': 2.5,
+        'sigma_form_lateral': 1, 'p_form_forward': 0.16, 'p_form_lateral': 1.,
         'p_elim_pot': 1.36 * 10 ** -4, 'p_elim_dep': 0.0245,
         'grid': np.array([16, 16]), 'lateral_inhibition': 0,
         'random_partner': False}
@@ -116,6 +118,7 @@ class SynapseDynamicsStructuralCommon(AbstractSynapseDynamicsStructural):
                  stdp_model=default_parameters['stdp_model'],
                  f_rew=default_parameters['f_rew'],
                  weight=default_parameters['weight'],
+                 max_weight=default_parameters['max_weight'],
                  delay=default_parameters['delay'],
                  s_max=default_parameters['s_max'],
                  sigma_form_forward=default_parameters['sigma_form_forward'],
@@ -132,6 +135,7 @@ class SynapseDynamicsStructuralCommon(AbstractSynapseDynamicsStructural):
         self._p_rew = 1. / self._f_rew
         self._initial_weight = weight
         self._initial_delay = delay
+        self._max_weight = max_weight
         self._s_max = s_max
         self._lateral_inhibition = lateral_inhibition
         self._sigma_form_forward = sigma_form_forward
@@ -157,12 +161,12 @@ class SynapseDynamicsStructuralCommon(AbstractSynapseDynamicsStructural):
         # Addition information -- used for SDRAM usage
         self._actual_sdram_usage = {}
 
-        self._ff_distance_probabilities = \
-            self.generate_distance_probability_array(
-                self._p_form_forward, self._sigma_form_forward)
-        self._lat_distance_probabilities = \
-            self.generate_distance_probability_array(
-                self._p_form_lateral, self._sigma_form_lateral)
+        # self._ff_distance_probabilities = \
+        #     self.generate_distance_probability_array(
+        #         self._p_form_forward, self._sigma_form_forward)
+        # self._lat_distance_probabilities = \
+        #     self.generate_distance_probability_array(
+        #         self._p_form_lateral, self._sigma_form_lateral)
 
     @property
     def weight_dynamics(self):
@@ -359,6 +363,12 @@ class SynapseDynamicsStructuralCommon(AbstractSynapseDynamicsStructural):
         # scale the inhibitory weight appropriately
         spec.write_value(
             data=int(round(self._initial_weight * weight_scales[1])))
+        # scale the excitatory weight appropriately
+        spec.write_value(
+            data=int(round(self._max_weight * weight_scales[0])))
+        # scale the inhibitory weight appropriately
+        spec.write_value(
+            data=int(round(self._max_weight * weight_scales[1])))
         spec.write_value(data=self._initial_delay)
         spec.write_value(data=int(self._s_max))
         spec.write_value(data=int(self._lateral_inhibition),
@@ -377,8 +387,10 @@ class SynapseDynamicsStructuralCommon(AbstractSynapseDynamicsStructural):
         spec.write_value(data=self._grid[1])
 
         # write probabilities for elimination
-        spec.write_value(data=self._p_elim_dep, data_type=DataType.U032)
-        spec.write_value(data=self._p_elim_pot, data_type=DataType.U032)
+        spec.write_value(data=int(self._p_elim_dep * (2 ** 32 - 1)),
+                         data_type=DataType.UINT32)
+        spec.write_value(data=int(self._p_elim_pot * (2 ** 32 - 1)),
+                         data_type=DataType.UINT32)
 
         # write the random seed (4 words), generated randomly,
         # but the same for all postsynaptic vertices!
@@ -576,17 +588,18 @@ class SynapseDynamicsStructuralCommon(AbstractSynapseDynamicsStructural):
         # TODO This should be done in a FormationRule object
         # Now we write the probability tables for formation
         # (feedforward and lateral)
-        spec.write_value(data=self._ff_distance_probabilities.size)
-        spec.write_array(
-            self._ff_distance_probabilities.view(dtype=np.uint16),
-            data_type=DataType.UINT16)
-        total_words_written += self._ff_distance_probabilities.size // 2 + 1
-        spec.write_value(data=self._lat_distance_probabilities.size,
-                         data_type=DataType.INT32)
-        spec.write_array(
-            self._lat_distance_probabilities.view(dtype=np.uint16),
-            data_type=DataType.UINT16)
-        total_words_written += self._lat_distance_probabilities.size // 2 + 1
+
+        # spec.write_value(data=self._ff_distance_probabilities.size)
+        # spec.write_array(
+        #     self._ff_distance_probabilities.view(dtype=np.uint16),
+        #     data_type=DataType.UINT16)
+        # total_words_written += self._ff_distance_probabilities.size // 2 + 1
+        # spec.write_value(data=self._lat_distance_probabilities.size,
+        #                  data_type=DataType.INT32)
+        # spec.write_array(
+        #     self._lat_distance_probabilities.view(dtype=np.uint16),
+        #     data_type=DataType.UINT16)
+        # total_words_written += self._lat_distance_probabilities.size // 2 + 1
 
         # Write post to pre table (inverse of synaptic matrix)
         self.__write_post_to_pre_table(spec, app_vertex, post_slice,
@@ -725,10 +738,10 @@ class SynapseDynamicsStructuralCommon(AbstractSynapseDynamicsStructural):
         total_size = structure_size + initial_size
 
         # Approximation of the sizes of both probability vs distance tables
-        ff_lut = np.count_nonzero(self._ff_distance_probabilities) * 4
-        lat_lut = np.count_nonzero(self._lat_distance_probabilities) * 4
-        total_size += ff_lut
-        total_size += lat_lut
+        # ff_lut = np.count_nonzero(self._ff_distance_probabilities) * 4
+        # lat_lut = np.count_nonzero(self._lat_distance_probabilities) * 4
+        # total_size += ff_lut
+        # total_size += lat_lut
         # total_size += (80 * 4)
         pop_size = 0
 

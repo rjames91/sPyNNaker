@@ -86,7 +86,7 @@ typedef struct {
 
 //! parameters of the synaptic rewiring model
 typedef struct {
-    uint32_t p_rew, fast, weight[2], delay, s_max, app_no_atoms,
+    uint32_t p_rew, fast, weight[2], g_max[2],delay, s_max, app_no_atoms,
         machine_no_atoms, low_atom, high_atom,
         size_ff_prob, size_lat_prob, grid_x, grid_y, p_elim_dep, p_elim_pot;
     // the 2 seeds that are used: shared for sync, local for everything else
@@ -94,7 +94,7 @@ typedef struct {
     // information about all pre-synaptic sub-populations eligible for rewiring
     pre_pop_info_table_t pre_pop_info_table;
     // distance dependent probabilities LUTs
-    uint16_t *ff_probabilities, *lat_probabilities;
+//    uint16_t *ff_probabilities, *lat_probabilities;
     // inverse of synaptic matrix
     int32_t *post_to_pre_table;
     // flags for synapse type of lateral connections and whether formations
@@ -124,7 +124,7 @@ typedef struct {
     int16_t current_controls;
     int32_t connection_type;
     // what are the global pre- and post-synaptic neuron ids
-    uint32_t global_pre_syn_id, global_post_syn_id;
+//    uint32_t global_pre_syn_id, global_post_syn_id;
     // does the post to pre table have contain a connection for the selected
     // slot
     bool element_exists;
@@ -198,8 +198,8 @@ address_t synaptogenesis_dynamics_initialise(address_t sdram_sp_address)
     rewiring_data.p_rew = *sp_word++;
     rewiring_data.weight[0] = *sp_word++;
     rewiring_data.weight[1] = *sp_word++;
-
-    log_info("w[%d, %d]",rewiring_data.weight[0],rewiring_data.weight[1]);
+    rewiring_data.g_max[0] = *sp_word++;
+    rewiring_data.g_max[1] = *sp_word++;
 
     rewiring_data.delay = *sp_word++;
     rewiring_data.s_max = *sp_word++;
@@ -272,28 +272,28 @@ address_t synaptogenesis_dynamics_initialise(address_t sdram_sp_address)
     }
 
     // Read the probability vs distance tables into DTCM
-    rewiring_data.size_ff_prob = *sp_word++;
-    rewiring_data.ff_probabilities = sark_alloc(
-	    rewiring_data.size_ff_prob, sizeof(uint16_t));
-    half_word = (uint16_t *) sp_word;
-    for (index = 0; index < rewiring_data.size_ff_prob; index++) {
-        rewiring_data.ff_probabilities[index] = *half_word++;
-    }
-
-    sp_word = (int32_t *) half_word;
-    rewiring_data.size_lat_prob = *sp_word++;
-
-    rewiring_data.lat_probabilities = sark_alloc(
-	    rewiring_data.size_lat_prob, sizeof(uint16_t));
-
-    half_word = (uint16_t *) sp_word;
-    for (index = 0; index < rewiring_data.size_lat_prob; index++) {
-        rewiring_data.lat_probabilities[index] = *half_word++;
-    }
-
-    assert(((int) half_word) % 4 == 4);
-
-    sp_word = (int32_t *) half_word;
+//    rewiring_data.size_ff_prob = *sp_word++;
+//    rewiring_data.ff_probabilities = sark_alloc(
+//	    rewiring_data.size_ff_prob, sizeof(uint16_t));
+//    half_word = (uint16_t *) sp_word;
+//    for (index = 0; index < rewiring_data.size_ff_prob; index++) {
+//        rewiring_data.ff_probabilities[index] = *half_word++;
+//    }
+//
+//    sp_word = (int32_t *) half_word;
+//    rewiring_data.size_lat_prob = *sp_word++;
+//
+//    rewiring_data.lat_probabilities = sark_alloc(
+//	    rewiring_data.size_lat_prob, sizeof(uint16_t));
+//
+//    half_word = (uint16_t *) sp_word;
+//    for (index = 0; index < rewiring_data.size_lat_prob; index++) {
+//        rewiring_data.lat_probabilities[index] = *half_word++;
+//    }
+//
+//    assert(((int) half_word) % 4 == 4);
+//
+//    sp_word = (int32_t *) half_word;
 
     // Setting up Post to Pre table
     rewiring_data.post_to_pre_table = sp_word;
@@ -483,44 +483,44 @@ void synaptogenesis_dynamics_rewire(uint32_t time)
     // To do this I need to take the DIV and MOD of the
     // postsyn neuron id, of the presyn neuron id
     // Compute the distance of these 2 measures
-    int32_t pre_x, pre_y, post_x, post_y, pre_global_id, post_global_id;
-    // Pre computation requires querying the table with global information
-    pre_global_id = rewiring_data.pre_pop_info_table.subpop_info[pre_app_pop]
-            .key_atom_info[pre_sub_pop].lo_atom + current_state.pre_syn_id;
-    post_global_id = current_state.post_syn_id + rewiring_data.low_atom;
-
-    if (rewiring_data.grid_x > 1) {
-        pre_x = pre_global_id / rewiring_data.grid_x;
-        post_x = post_global_id / rewiring_data.grid_x;
-    } else {
-        pre_x = 0;
-        post_x = 0;
-    }
-
-    if (rewiring_data.grid_y > 1) {
-        pre_y = pre_global_id % rewiring_data.grid_y;
-        post_y = post_global_id % rewiring_data.grid_y;
-    } else {
-        pre_y = 0;
-        post_y = 0;
-    }
-
-    // With periodic boundary conditions
-    uint delta_x, delta_y;
-    delta_x = my_abs(pre_x - post_x);
-    delta_y = my_abs(pre_y - post_y);
-
-    if (delta_x > rewiring_data.grid_x >> 1 && rewiring_data.grid_x > 1) {
-        delta_x -= rewiring_data.grid_x;
-    }
-
-    if (delta_y > rewiring_data.grid_y >> 1 && rewiring_data.grid_y > 1) {
-        delta_y -= rewiring_data.grid_y;
-    }
-
-    current_state.distance = delta_x * delta_x + delta_y * delta_y;
-    current_state.global_pre_syn_id = pre_global_id;
-    current_state.global_post_syn_id = post_global_id;
+//    int32_t pre_x, pre_y, post_x, post_y, pre_global_id, post_global_id;
+//    // Pre computation requires querying the table with global information
+//    pre_global_id = rewiring_data.pre_pop_info_table.subpop_info[pre_app_pop]
+//            .key_atom_info[pre_sub_pop].lo_atom + current_state.pre_syn_id;
+//    post_global_id = current_state.post_syn_id + rewiring_data.low_atom;
+//
+//    if (rewiring_data.grid_x > 1) {
+//        pre_x = pre_global_id / rewiring_data.grid_x;
+//        post_x = post_global_id / rewiring_data.grid_x;
+//    } else {
+//        pre_x = 0;
+//        post_x = 0;
+//    }
+//
+//    if (rewiring_data.grid_y > 1) {
+//        pre_y = pre_global_id % rewiring_data.grid_y;
+//        post_y = post_global_id % rewiring_data.grid_y;
+//    } else {
+//        pre_y = 0;
+//        post_y = 0;
+//    }
+//
+//    // With periodic boundary conditions
+//    uint delta_x, delta_y;
+//    delta_x = my_abs(pre_x - post_x);
+//    delta_y = my_abs(pre_y - post_y);
+//
+//    if (delta_x > rewiring_data.grid_x >> 1 && rewiring_data.grid_x > 1) {
+//        delta_x -= rewiring_data.grid_x;
+//    }
+//
+//    if (delta_y > rewiring_data.grid_y >> 1 && rewiring_data.grid_y > 1) {
+//        delta_y -= rewiring_data.grid_y;
+//    }
+//
+//    current_state.distance = delta_x * delta_x + delta_y * delta_y;
+//    current_state.global_pre_syn_id = pre_global_id;
+//    current_state.global_post_syn_id = post_global_id;
 
     while (!spin1_dma_transfer(
             DMA_TAG_READ_SYNAPTIC_ROW_FOR_REWIRING, synaptic_row_address,
@@ -582,14 +582,14 @@ bool synaptogenesis_dynamics_elimination_rule(void)
 {
     // Is synaptic weight <.5 g_max? (i.e. synapse is depressed)
     uint32_t r = mars_kiss64_seed(rewiring_data.local_seed);
-    int appr_scaled_weight = rewiring_data.weight[current_state.connection_type];
+    int appr_scaled_weight = rewiring_data.g_max[current_state.connection_type];
     if (current_state.sp_data.weight < (appr_scaled_weight / 2) &&
             r > rewiring_data.p_elim_dep) {
         return false;
     }
 
     // otherwise, if synapse is potentiated, use probability 2
-    if (current_state.sp_data.weight >= (appr_scaled_weight / 2) &&
+    if (current_state.sp_data.weight => (appr_scaled_weight / 2) &&
             r > rewiring_data.p_elim_pot) {
         return false;
     }
@@ -623,23 +623,23 @@ bool synaptogenesis_dynamics_formation_rule(void)
         return false;
     }
 
-    if ((current_state.current_controls == 0 &&
-	    current_state.distance > rewiring_data.size_ff_prob)
-	    || (current_state.current_controls == 1 &&
-		    current_state.distance > rewiring_data.size_lat_prob)) {
-        return false;
-    }
-
-    if (current_state.current_controls == 0) {
-        probability = rewiring_data.ff_probabilities[current_state.distance];
-    } else {
-        probability = rewiring_data.lat_probabilities[current_state.distance];
-    }
-    uint16_t r = ulrbits(mars_kiss64_seed(rewiring_data.local_seed)) *
-            MAX_SHORT;
-    if (r > probability) {
-        return false;
-    }
+//    if ((current_state.current_controls == 0 &&
+//	    current_state.distance > rewiring_data.size_ff_prob)
+//	    || (current_state.current_controls == 1 &&
+//		    current_state.distance > rewiring_data.size_lat_prob)) {
+//        return false;
+//    }
+//
+//    if (current_state.current_controls == 0) {
+//        probability = rewiring_data.ff_probabilities[current_state.distance];
+//    } else {
+//        probability = rewiring_data.lat_probabilities[current_state.distance];
+//    }
+//    uint16_t r = ulrbits(mars_kiss64_seed(rewiring_data.local_seed)) *
+//            MAX_SHORT;
+//    if (r > probability) {
+//        return false;
+//    }
     int appr_scaled_weight = rewiring_data.weight[current_state.connection_type];
 
     if (!add_neuron(current_state.post_syn_id, rewiring_dma_buffer.row,
