@@ -90,9 +90,9 @@ class NeuronRecorder(object):
         vertices = graph_mapper.get_machine_vertices(application_vertex)
         progress = ProgressBar(
             vertices, "Getting {} for {}".format(variable, label))
-        sampling_interval = self._sampling_rates[variable]
+        sampling_rate = self._sampling_rates[variable]
         expected_rows = int(math.ceil(
-            n_machine_time_steps / sampling_interval))
+            n_machine_time_steps / sampling_rate))
         missing_str = ""
         data = None
         indexes = []
@@ -129,7 +129,7 @@ class NeuronRecorder(object):
                 # Start the fragment for this slice empty
                 fragment = numpy.empty((expected_rows, n_neurons))
                 for i in xrange(0, expected_rows):
-                    time = i * sampling_interval
+                    time = i * sampling_rate
                     # Check if there is data for this timestep
                     local_indexes = numpy.where(record[:, 0] == time)
                     if len(local_indexes[0]) > 0:
@@ -148,6 +148,7 @@ class NeuronRecorder(object):
             logger.warn(
                 "Population {} is missing recorded data in region {} from the"
                 " following cores: {}".format(label, region, missing_str))
+        sampling_interval = self.get_neuron_sampling_interval(variable)
         return (data, indexes, sampling_interval)
 
     def get_spikes(
@@ -323,22 +324,39 @@ class NeuronRecorder(object):
             self._sampling_rates[variable] = 0
             self._indexes[variable] = None
 
+    def _check_complete_overwrite(self, variable, indexes):
+        if indexes is None:
+            # overwriting all OK!
+            return
+        if self._indexes[variable] is None:
+            if set(set(range(self._n_neurons))).issubset(set(indexes)):
+                # overwriting all previous so OK!
+                return
+        else:
+            if set(self._indexes[variable]).issubset(set(indexes)):
+                # overwriting all previous so OK!
+                return
+        raise ConfigurationException(
+            "Current implementation does not support multiple "
+            "sampling_intervals for {} on one population.".format(
+                variable))
+
     def _turn_on_recording(self, variable, sampling_interval, indexes):
 
         rate = self._compute_rate(sampling_interval)
         if self._sampling_rates[variable] == 0:
+            # Previously not recording so ok
             self._sampling_rates[variable] = rate
         elif rate != self._sampling_rates[variable]:
-            msg = "Current implementation does not support multiple " \
-                  "sampling_intervals for {} on one population. ".format(
-                      variable)
-            raise ConfigurationException(msg)
+            self._check_complete_overwrite(variable, indexes)
         # else rate not changed so no action
 
         if indexes is None:
             # previous recording indexes does not matter as now all (None)
             self._indexes[variable] = None
         else:
+            # make sure indexes is not a generator like range
+            indexes = list(indexes)
             self.check_indexes(indexes)
             if self._indexes[variable] is None:
                 # just use the new indexes
