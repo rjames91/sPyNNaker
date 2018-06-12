@@ -100,6 +100,7 @@ state_t neuron_model_state_update(
     _rk2_kernel_midpoint(neuron->this_h, neuron, input_this_timestep);
     neuron->this_h = global_params->machine_timestep_ms;
 
+    // todo: this should be done in an event-based manner, with a LUT
     neuron->V2_membrane = exc_input[1] - inh_input[1];
         
     update_dv_dt(neuron);

@@ -66,6 +66,7 @@ state_t neuron_model_state_update(
         // neuron->V2_membrane = 0.0k;
     }
 
+    // todo: this should be done in an event-based manner, with a LUT
     neuron->V2_membrane = exc_input[1] - inh_input[1];
         
     update_dv_dt(neuron);
