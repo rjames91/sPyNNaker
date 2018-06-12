@@ -142,9 +142,9 @@ current_state_t current_state;
 #define ANY_SPIKE ((spike_t) -1)
 
 //! abs function
-static int my_abs(int a) {
-    return a < 0 ? -a : a;
-}
+//static int my_abs(int a) {
+//    return a < 0 ? -a : a;
+//}
 
 //! function to unpack elment from post ot pre table into constituent bits
 static inline bool unpack_post_to_pre(
@@ -549,7 +549,7 @@ void synaptic_row_restructure(uint dma_id, uint dma_tag)
 
     if (current_state.element_exists && search_hit) {
         synaptogenesis_dynamics_elimination_rule();
-    } else {
+    } else if (!current_state.element_exists && !search_hit){
         synaptogenesis_dynamics_formation_rule();
     }
     // service the next event (either rewiring or synaptic)
@@ -589,7 +589,7 @@ bool synaptogenesis_dynamics_elimination_rule(void)
     }
 
     // otherwise, if synapse is potentiated, use probability 2
-    if (current_state.sp_data.weight => (appr_scaled_weight / 2) &&
+    if (current_state.sp_data.weight >= (appr_scaled_weight >> 1) &&
             r > rewiring_data.p_elim_pot) {
         return false;
     }
@@ -615,7 +615,7 @@ bool synaptogenesis_dynamics_elimination_rule(void)
 bool synaptogenesis_dynamics_formation_rule(void)
 {
     // Distance based probability extracted from the appropriate LUT
-    uint16_t probability;
+//    uint16_t probability;
     uint no_elems = number_of_connections_in_row(
         synapse_row_fixed_region(rewiring_dma_buffer.row));
     if (no_elems >= rewiring_data.s_max) {
