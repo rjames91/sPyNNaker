@@ -24,11 +24,11 @@ from data_specification.enums import DataType
 # spynnaker
 from spynnaker.pyNN.exceptions import SynapticConfigurationException
 from spynnaker.pyNN.models.neural_projections.connectors \
-    import OneToOneConnector
+    import OneToOneConnector,AllToAllConnector
 from spynnaker.pyNN.models.neural_projections import ProjectionApplicationEdge
 from spynnaker.pyNN.models.neuron import master_pop_table_generators
 from spynnaker.pyNN.models.neuron.synapse_dynamics \
-    import SynapseDynamicsStatic, AbstractSynapseDynamicsStructural
+    import SynapseDynamicsStatic, AbstractSynapseDynamicsStructural,SynapseDynamicsSTDP
 from spynnaker.pyNN.models.neuron.synapse_io import SynapseIORowBased
 from spynnaker.pyNN.models.spike_source import SpikeSourcePoisson
 from spynnaker.pyNN.models.utility_models import DelayExtensionVertex
@@ -531,7 +531,14 @@ class SynapticManager(object):
         if weights_signed:
             max_weight_powers = (m + 1 for m in max_weight_powers)
 
-        return list(max_weight_powers)
+        if "fixed_weight_scale" in machine_vertex.label: #isinstance(synapse_dynamics,SynapseDynamicsSTDP):# and isinstance(connector, AllToAllConnector):#
+            output = [4, 4] #scale by 2**11
+            #output = [2,2]#[1,1]#scale by 2*14 (w2s=2.0)
+            #output = [3, 0]  # same scaling as onetoone connections with a weight=w2s (producing nice STDP curves)
+            #output = list(max_weight_powers)#[4,0]#
+        else:
+            output = list(max_weight_powers)  #[4, 4]  #TODO: investigate why there is a different SSP weight power caluculated for the first vertex
+        return output
 
     @staticmethod
     def _get_weight_scale(ring_buffer_to_input_left_shift):
@@ -540,7 +547,7 @@ class SynapticManager(object):
             shifted left by ring_buffer_to_input_left_shift to produce an\
             s1615 fixed point number
         """
-        return float(math.pow(2, 16 - (ring_buffer_to_input_left_shift + 1)))
+        return float(math.pow(2, 16 - (ring_buffer_to_input_left_shift + 1)))#float(math.pow(2, 11))#
 
     def _write_synapse_parameters(
             self, spec, machine_vertex, machine_graph, graph_mapper,
@@ -560,9 +567,15 @@ class SynapticManager(object):
 
         spec.write_array(ring_buffer_shifts)
 
-        weight_scales = numpy.array([
-            self._get_weight_scale(r) * weight_scale
+        if 0:#isinstance(self.synapse_dynamics,SynapseDynamicsSTDP):
+            weight_scales = numpy.array([
+            2**11 * weight_scale
             for r in ring_buffer_shifts])
+        else:
+            weight_scales = numpy.array([
+                self._get_weight_scale(r) * weight_scale
+                for r in ring_buffer_shifts])
+
         return weight_scales
 
     def _write_padding(
