@@ -101,6 +101,11 @@ static inline update_state_t timing_apply_pre_spike(
     use(last_pre_time);
     use(&last_pre_trace);
 
+    //ROB HACK! very small depression over time (to drop weights on idle synapses)
+    // we know STDP fixed point format is
+    int32_t steady_minus = 1 << (STDP_FIXED_POINT - 7);//0.015625
+    previous_state.a2_minus += steady_minus;
+
     // Get time of event relative to last post-synaptic event
     uint32_t time_since_last_post = time - last_post_time;
     if (time_since_last_post > 0) {

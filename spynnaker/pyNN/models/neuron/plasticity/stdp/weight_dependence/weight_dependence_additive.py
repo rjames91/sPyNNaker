@@ -77,9 +77,6 @@ class WeightDependenceAdditive(
             scaled_a_plus = int(round(self._a_plus *self._w_max * w))
             scaled_a_minus = int(round(self._a_minus *self._w_max * w))
 
-            # scaled_a_plus = int(abs(round(math.log(self._a_plus,2.))))
-            # scaled_a_minus = int(abs(round(math.log(self._a_minus,2.))))
-
             if scaled_a_minus == 0 or scaled_a_plus == 0:
                 raise ArithmeticError("STDP alpha constants (a_plus={} a_minus={} weight_scale={})"
                                       " have been scaled to 0!".format(self._a_plus,self._a_minus,w))

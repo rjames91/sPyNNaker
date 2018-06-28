@@ -583,7 +583,7 @@ bool synaptogenesis_dynamics_elimination_rule(void)
     // Is synaptic weight <.5 g_max? (i.e. synapse is depressed)
     uint32_t r = mars_kiss64_seed(rewiring_data.local_seed);
     int appr_scaled_weight = rewiring_data.g_max[current_state.connection_type];
-    if (current_state.sp_data.weight < (appr_scaled_weight / 2) &&
+    if (current_state.sp_data.weight < (appr_scaled_weight >> 1) &&
             r > rewiring_data.p_elim_dep) {
         return false;
     }
