@@ -16,8 +16,7 @@ _IZK_THRESHOLD = 30.0
 DEFAULT_MAX_ATOMS_PER_CORE = 32
 class IzkCurrCombExp4E4I(AbstractPopulationVertex):
 
-    _max_feasible_max_atoms_per_core =  DEFAULT_MAX_ATOMS_PER_CORE
-    _model_based_max_atoms_per_core = _max_feasible_max_atoms_per_core
+    _model_based_max_atoms_per_core = DEFAULT_MAX_ATOMS_PER_CORE
 
     baseline_defaults = {
         'x_a_response': 0,
@@ -192,8 +191,8 @@ class IzkCurrCombExp4E4I(AbstractPopulationVertex):
 
 
             i_offset=default_parameters['i_offset'],
-            a =   default_parameters['a'],
-            c =default_parameters['c'] ,
+            a = default_parameters['a'],
+            c = default_parameters['c'] ,
             b = default_parameters['b'],
             d = default_parameters['d'],
             u_init = initialize_parameters['u_init'],
