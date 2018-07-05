@@ -2,8 +2,7 @@ from data_specification.enums import DataType
 from spinn_utilities.overrides import overrides
 from spynnaker.pyNN.models.abstract_models import AbstractContainsUnits
 from spynnaker.pyNN.models.neural_properties import NeuronParameter
-from spynnaker.pyNN.utilities.ranged.spynakker_ranged_dict import \
-    SpynakkerRangeDictionary
+from spynnaker.pyNN.utilities.ranged import SpynnakerRangeDictionary
 
 from .abstract_input_type import AbstractInputType
 
@@ -17,10 +16,12 @@ class _CONDUCTANTCE_TYPES(Enum):
     E_REV_E = (1, DataType.S1615)
     E_REV_I = (2, DataType.S1615)
 
-    def __new__(cls, value, data_type):
+    def __new__(cls, value, data_type, doc=""):
+        # pylint: disable=protected-access
         obj = object.__new__(cls)
         obj._value_ = value
         obj._data_type = data_type
+        obj.__doc__ = doc
         return obj
 
     @property
@@ -31,16 +32,18 @@ class _CONDUCTANTCE_TYPES(Enum):
 class InputTypeConductance(AbstractInputType, AbstractContainsUnits):
     """ The conductance input type
     """
+    __slots__ = [
+        "_data",
+        "_n_neurons",
+        "_units"]
 
     def __init__(self, n_neurons, e_rev_E, e_rev_I):
-        AbstractInputType.__init__(self)
-        AbstractContainsUnits.__init__(self)
         self._units = {
             E_REV_E: "mV",
             E_REV_I: "mV"}
 
         self._n_neurons = n_neurons
-        self._data = SpynakkerRangeDictionary(size=n_neurons)
+        self._data = SpynnakerRangeDictionary(size=n_neurons)
         self._data[E_REV_E] = e_rev_E
         self._data[E_REV_I] = e_rev_I
 

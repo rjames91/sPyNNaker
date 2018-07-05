@@ -245,8 +245,6 @@ class IzkCurrCombExp4E4I(AbstractPopulationVertex):
                 exc4_b_B,
                 exc4_b_tau,
 
-
-
                 # inhibitory
                 inh_a_response,
                 inh_a_A,
@@ -292,7 +290,8 @@ class IzkCurrCombExp4E4I(AbstractPopulationVertex):
             incoming_spike_buffer_size=incoming_spike_buffer_size,
             model_name="IZK_curr_comb_exp_4E4I", neuron_model=neuron_model,
             input_type=input_type, synapse_type=synapse_type,
-            threshold_type=threshold_type, constraints=constraints, max_feasible_atoms_per_core=IzkCurrCombExp4E4I._max_feasible_max_atoms_per_core)
+            threshold_type=threshold_type, constraints=constraints
+            )
 
     @staticmethod
     def set_model_max_atoms_per_core(new_value=DEFAULT_MAX_ATOMS_PER_CORE):

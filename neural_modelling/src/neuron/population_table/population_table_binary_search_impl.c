@@ -1,7 +1,6 @@
 #include "population_table.h"
-#include "../synapse_row.h"
+#include <neuron/synapse_row.h>
 #include <debug.h>
-#include <string.h>
 
 typedef struct master_population_table_entry {
     uint32_t key;
@@ -52,35 +51,35 @@ static inline uint32_t _get_neuron_id(
 }
 
 static inline void _print_master_population_table() {
-    log_info("master_population\n");
-    log_info("------------------------------------------\n");
+    log_debug("master_population\n");
+    log_debug("------------------------------------------\n");
     for (uint32_t i = 0; i < master_population_table_length; i++) {
         master_population_table_entry entry = master_population_table[i];
         for (uint16_t j = entry.start; j < (entry.start + entry.count); j++) {
-            log_info(
+            log_debug(
                 "index (%d, %d), key: 0x%.8x, mask: 0x%.8x, address: 0x%.8x,"
                 " row_length: %u\n", i, j, entry.key, entry.mask,
                 _get_address(address_list[j]),
                 _get_row_length(address_list[j]));
         }
     }
-    log_info("------------------------------------------\n");
+    log_debug("------------------------------------------\n");
 }
 
 bool population_table_initialise(
         address_t table_address, address_t synapse_rows_address,
         address_t direct_rows_address, uint32_t *row_max_n_words) {
-    log_info("population_table_initialise: starting");
+    log_debug("population_table_initialise: starting");
 
     master_population_table_length = table_address[0];
-    log_info("master pop table length is %d\n", master_population_table_length);
-    log_info(
+    log_debug("master pop table length is %d\n", master_population_table_length);
+    log_debug(
         "master pop table entry size is %d\n",
         sizeof(master_population_table_entry));
     uint32_t n_master_pop_bytes =
         master_population_table_length * sizeof(master_population_table_entry);
     uint32_t n_master_pop_words = n_master_pop_bytes >> 2;
-    log_info("pop table size is %d\n", n_master_pop_bytes);
+    log_debug("pop table size is %d\n", n_master_pop_bytes);
 
     // only try to malloc if there's stuff to malloc.
     if (n_master_pop_bytes != 0){
@@ -106,24 +105,25 @@ bool population_table_initialise(
         }
     }
 
-    log_info(
+    log_debug(
         "pop table size: %u (%u bytes)", master_population_table_length,
         n_master_pop_bytes);
-    log_info(
+    log_debug(
         "address list size: %u (%u bytes)", address_list_length,
         n_address_list_bytes);
 
     // Copy the master population table
-    memcpy(master_population_table, &(table_address[2]), n_master_pop_bytes);
-    memcpy(
+    spin1_memcpy(master_population_table, &(table_address[2]),
+            n_master_pop_bytes);
+    spin1_memcpy(
         address_list, &(table_address[2 + n_master_pop_words]),
         n_address_list_bytes);
 
     // Store the base address
-    log_info(
+    log_debug(
         "the stored synaptic matrix base address is located at: 0x%08x",
         synapse_rows_address);
-    log_info(
+    log_debug(
         "the direct synaptic matrix base address is located at: 0x%08x",
         direct_rows_address);
     synaptic_rows_base_address = synapse_rows_address;

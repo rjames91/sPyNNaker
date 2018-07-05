@@ -8,10 +8,9 @@
 * time-constants (and thus propogators) are identical.
 */
 
-
-
 #ifndef _SYNAPSE_TYPES_DUAL_EXCITATORY_EXPONENTIAL_IMPL_H_
 #define _SYNAPSE_TYPES_DUAL_EXCITATORY_EXPONENTIAL_IMPL_H_
+
 
 //---------------------------------------
 // Macros
@@ -20,12 +19,20 @@
 #define SYNAPSE_TYPE_COUNT 3
 #define SYNAPSE_INDEX_BITS 8
 
-#include "../decay.h"
+#define NUM_EXCITATORY_RECEPTORS 2
+#define NUM_INHIBITORY_RECEPTORS 1
+
+#include <neuron/decay.h>
 #include <debug.h>
+#include "synapse_types.h"
+
 
 //---------------------------------------
 // Synapse parameters
 //---------------------------------------
+input_t excitatory_response[NUM_EXCITATORY_RECEPTORS];
+input_t inhibitory_response[NUM_INHIBITORY_RECEPTORS];
+
 typedef struct synapse_param_t {
     decay_t exc_decay;
     decay_t exc_init;
@@ -37,16 +44,6 @@ typedef struct synapse_param_t {
     input_t input_buffer_excitatory2_value;
     input_t input_buffer_inhibitory_value;
 } synapse_param_t;
-
-#include "synapse_types.h"
-
-
-#define NUM_EXCITATORY_RECEPTORS 2
-#define NUM_INHIBITORY_RECEPTORS 1
-#define NUM_NEUROMODULATORS 0
-
-input_t excitatory_response[NUM_EXCITATORY_RECEPTORS];
-input_t inhibitory_response[NUM_INHIBITORY_RECEPTORS];
 
 //! human readable definition for the positions in the input regions for the
 //! different synapse types.
@@ -109,22 +106,22 @@ static inline void synapse_types_add_neuron_input(
 //! \brief extracts the excitatory input buffers from the buffers available
 //! for a given parameter set
 //! \param[in]  parameter: the pointer to the parameters to use
-//! \return the excitatory input buffers for a given neuron id.
+//! \return the excitatory input buffers for a given neuron ID.
 static inline input_t* synapse_types_get_excitatory_input(
         synapse_param_pointer_t parameter) {
-	excitatory_response[0] = parameter->input_buffer_excitatory_value;
-	excitatory_response[1] = parameter->input_buffer_excitatory2_value;
-    return excitatory_response;
+    excitatory_response[0] = parameter->input_buffer_excitatory_value;
+    excitatory_response[1] = parameter->input_buffer_excitatory2_value;
+    return &excitatory_response[0];
 }
 
 //! \brief extracts the inhibitory input buffers from the buffers available
 //! for a given parameter set
 //! \param[in]  parameter: the pointer to the parameters to use
-//! \return the inhibitory input buffers for a given neuron id.
+//! \return the inhibitory input buffers for a given neuron ID.
 static inline input_t* synapse_types_get_inhibitory_input(
         synapse_param_pointer_t parameter) {
-	inhibitory_response[0] = parameter->input_buffer_inhibitory_value;
-    return inhibitory_response;
+    inhibitory_response[0] = parameter->input_buffer_inhibitory_value;
+    return &inhibitory_response[0];
 }
 
 //! \brief returns a human readable character for the type of synapse.
@@ -146,7 +143,7 @@ static inline const char *synapse_types_get_type_char(
     }
 }
 
-//! \brief prints the input for a neuron id given the available inputs
+//! \brief prints the input for a neuron ID given the available inputs
 //! currently only executed when the models are in debug mode, as the prints are
 //! controlled from the synapses.c _print_inputs method.
 //! \param[in]  parameter: the pointer to the parameters to use

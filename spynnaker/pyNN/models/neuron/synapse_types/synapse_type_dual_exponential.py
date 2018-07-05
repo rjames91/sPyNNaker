@@ -1,11 +1,10 @@
-from pacman.executor.injection_decorator import inject_items
 from spinn_utilities.overrides import overrides
+from pacman.executor.injection_decorator import inject_items
 from spynnaker.pyNN.models.abstract_models import AbstractContainsUnits
 from spynnaker.pyNN.models.neuron.synapse_types.synapse_type_exponential \
     import get_exponential_decay_and_init
 from spynnaker.pyNN.models.neural_properties import NeuronParameter
-from spynnaker.pyNN.utilities.ranged.spynakker_ranged_dict import \
-    SpynakkerRangeDictionary
+from spynnaker.pyNN.utilities.ranged import SpynnakerRangeDictionary
 from .abstract_synapse_type import AbstractSynapseType
 from data_specification.enums import DataType
 
@@ -33,10 +32,12 @@ class _DUAL_EXP_TYPES(Enum):
     INITIAL_EXC2 = (8, DataType.S1615)
     INITIAL_INH = (9, DataType.S1615)
 
-    def __new__(cls, value, data_type):
+    def __new__(cls, value, data_type, doc=""):
+        # pylint: disable=protected-access
         obj = object.__new__(cls)
         obj._value_ = value
         obj._data_type = data_type
+        obj.__doc__ = doc
         return obj
 
     @property
@@ -45,13 +46,15 @@ class _DUAL_EXP_TYPES(Enum):
 
 
 class SynapseTypeDualExponential(AbstractSynapseType, AbstractContainsUnits):
+    __slots__ = [
+        "_data",
+        "_n_neurons",
+        "_units"]
 
     def __init__(self, n_neurons, tau_syn_E, tau_syn_E2,
                  tau_syn_I, initial_input_exc, initial_input_exc2,
                  initial_input_inh):
-        AbstractSynapseType.__init__(self)
-        AbstractContainsUnits.__init__(self)
-
+        # pylint: disable=too-many-arguments
         self._units = {
             TAU_SYN_E: "mV",
             TAU_SYN_E2: "mV",
@@ -60,7 +63,7 @@ class SynapseTypeDualExponential(AbstractSynapseType, AbstractContainsUnits):
             GSYN_INH: "uS"}
 
         self._n_neurons = n_neurons
-        self._data = SpynakkerRangeDictionary(size=n_neurons)
+        self._data = SpynnakerRangeDictionary(size=n_neurons)
         self._data[TAU_SYN_E] = tau_syn_E
         self._data[TAU_SYN_E2] = tau_syn_E2
         self._data[TAU_SYN_I] = tau_syn_I
@@ -116,9 +119,11 @@ class SynapseTypeDualExponential(AbstractSynapseType, AbstractContainsUnits):
     def isyn_exc2(self, new_value):
         self._data.set_value(key=INITIAL_INPUT_EXC2, value=new_value)
 
+    @overrides(AbstractSynapseType.get_n_synapse_types)
     def get_n_synapse_types(self):
         return 3
 
+    @overrides(AbstractSynapseType.get_synapse_id_by_target)
     def get_synapse_id_by_target(self, target):
         if target == "excitatory":
             return 0
@@ -128,14 +133,17 @@ class SynapseTypeDualExponential(AbstractSynapseType, AbstractContainsUnits):
             return 2
         return None
 
+    @overrides(AbstractSynapseType.get_synapse_targets)
     def get_synapse_targets(self):
         return "excitatory", "excitatory2", "inhibitory"
 
+    @overrides(AbstractSynapseType.get_n_synapse_type_parameters)
     def get_n_synapse_type_parameters(self):
         return 9
 
     @inject_items({"machine_time_step": "MachineTimeStep"})
     def get_synapse_type_parameters(self, machine_time_step):
+        # pylint: disable=arguments-differ
         e_decay, e_init = get_exponential_decay_and_init(
             self._data[TAU_SYN_E], machine_time_step)
         e_decay2, e_init2 = get_exponential_decay_and_init(
@@ -161,9 +169,11 @@ class SynapseTypeDualExponential(AbstractSynapseType, AbstractContainsUnits):
                 _DUAL_EXP_TYPES.INITIAL_INH.data_type)
         ]
 
+    @overrides(AbstractSynapseType.get_synapse_type_parameter_types)
     def get_synapse_type_parameter_types(self):
         return [item.data_type for item in _DUAL_EXP_TYPES]
 
+    @overrides(AbstractSynapseType.get_n_cpu_cycles_per_neuron)
     def get_n_cpu_cycles_per_neuron(self):
 
         # A guess

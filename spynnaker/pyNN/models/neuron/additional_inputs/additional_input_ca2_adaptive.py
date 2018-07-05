@@ -3,8 +3,7 @@ from spynnaker.pyNN.models.neural_properties import NeuronParameter
 from data_specification.enums import DataType
 from spynnaker.pyNN.models.neuron.additional_inputs \
     import AbstractAdditionalInput
-from spynnaker.pyNN.utilities.ranged.spynakker_ranged_dict import \
-    SpynakkerRangeDictionary
+from spynnaker.pyNN.utilities.ranged import SpynnakerRangeDictionary
 
 import numpy
 from enum import Enum
@@ -19,10 +18,12 @@ class _CA2_TYPES(Enum):
     I_CA2 = (2, DataType.S1615)
     I_ALPHA = (3, DataType.S1615)
 
-    def __new__(cls, value, data_type):
+    def __new__(cls, value, data_type, doc=""):
+        # pylint: disable=protected-access
         obj = object.__new__(cls)
         obj._value_ = value
         obj._data_type = data_type
+        obj.__doc__ = doc
         return obj
 
     @property
@@ -31,12 +32,13 @@ class _CA2_TYPES(Enum):
 
 
 class AdditionalInputCa2Adaptive(AbstractAdditionalInput):
+    __slots__ = [
+        "_data",
+        "_n_neurons"]
 
     def __init__(self, n_neurons, tau_ca2, i_ca2, i_alpha):
-        AbstractAdditionalInput.__init__(self)
-
         self._n_neurons = n_neurons
-        self._data = SpynakkerRangeDictionary(size=n_neurons)
+        self._data = SpynnakerRangeDictionary(size=n_neurons)
         self._data[TAU_CA2] = tau_ca2
         self._data[I_CA2] = i_ca2
         self._data[I_ALPHA] = i_alpha
@@ -75,13 +77,13 @@ class AdditionalInputCa2Adaptive(AbstractAdditionalInput):
 
     @inject_items({"machine_time_step": "MachineTimeStep"})
     def get_parameters(self, machine_time_step):
+        # pylint: disable=arguments-differ
         return [
             NeuronParameter(
                 self._exp_tau_ca2(machine_time_step),
                 _CA2_TYPES.EXP_TAU_CA2.data_type),
             NeuronParameter(self._data[I_CA2], _CA2_TYPES.I_CA2.data_type),
-            NeuronParameter(self._data[I_ALPHA], _CA2_TYPES.I_ALPHA.data_type)
-        ]
+            NeuronParameter(self._data[I_ALPHA], _CA2_TYPES.I_ALPHA.data_type)]
 
     def get_parameter_types(self):
         return [item.data_type for item in _CA2_TYPES]

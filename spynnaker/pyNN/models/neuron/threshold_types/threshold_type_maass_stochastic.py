@@ -1,8 +1,8 @@
-from spynnaker.pyNN.models.neural_properties import NeuronParameter
+from spinn_utilities.overrides import overrides
 from data_specification.enums import DataType
+from spynnaker.pyNN.models.neural_properties import NeuronParameter
 from spynnaker.pyNN.models.neuron.threshold_types import AbstractThresholdType
-from spynnaker.pyNN.utilities.ranged.spynakker_ranged_dict import \
-    SpynakkerRangeDictionary
+from spynnaker.pyNN.utilities.ranged import SpynnakerRangeDictionary
 
 from enum import Enum
 
@@ -18,10 +18,12 @@ class _MAASS_TYPES(Enum):
     TAU_TH = (2, DataType.S1615)
     V_THRESH = (3, DataType.S1615)
 
-    def __new__(cls, value, data_type):
+    def __new__(cls, value, data_type, doc=""):
+        # pylint: disable=protected-access
         obj = object.__new__(cls)
         obj._value_ = value
         obj._data_type = data_type
+        obj.__doc__ = doc
         return obj
 
     @property
@@ -32,12 +34,14 @@ class _MAASS_TYPES(Enum):
 class ThresholdTypeMaassStochastic(AbstractThresholdType):
     """ A stochastic threshold
     """
+    __slots__ = [
+        "_data",
+        "_n_neurons"]
 
     def __init__(self, n_neurons, du_th, tau_th, v_thresh):
-        AbstractThresholdType.__init__(self)
         self._n_neurons = n_neurons
 
-        self._data = SpynakkerRangeDictionary(size=n_neurons)
+        self._data = SpynnakerRangeDictionary(size=n_neurons)
         self._data[DU_TH] = du_th
         self._data[DU_TH_INV] = self._data[DU_TH].apply_operation(
             lambda x: 1.0 / x)
@@ -78,9 +82,11 @@ class ThresholdTypeMaassStochastic(AbstractThresholdType):
     def _tau_th_inv(self):
         return self._data[TAU_TH_INV]
 
+    @overrides(AbstractThresholdType.get_n_threshold_parameters)
     def get_n_threshold_parameters(self):
         return 3
 
+    @overrides(AbstractThresholdType.get_threshold_parameters)
     def get_threshold_parameters(self):
         return [
             NeuronParameter(
@@ -91,8 +97,10 @@ class ThresholdTypeMaassStochastic(AbstractThresholdType):
                 self._data[V_THRESH], _MAASS_TYPES.V_THRESH.data_type)
         ]
 
+    @overrides(AbstractThresholdType.get_threshold_parameter_types)
     def get_threshold_parameter_types(self):
         return [item.data_type for item in _MAASS_TYPES]
 
+    @overrides(AbstractThresholdType.get_n_cpu_cycles_per_neuron)
     def get_n_cpu_cycles_per_neuron(self):
         return 30
