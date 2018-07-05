@@ -14,7 +14,6 @@
 //---------------------------------------
 #define SYNAPSE_TYPE_BITS 3
 #define SYNAPSE_TYPE_COUNT 8
-#define SYNAPSE_INDEX_BITS 5
 
 #define NUM_EXCITATORY_RECEPTORS 4
 #define NUM_INHIBITORY_RECEPTORS 4
