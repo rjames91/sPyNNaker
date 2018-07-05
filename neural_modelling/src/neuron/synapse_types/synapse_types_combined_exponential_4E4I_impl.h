@@ -18,7 +18,6 @@
 
 #define NUM_EXCITATORY_RECEPTORS 4
 #define NUM_INHIBITORY_RECEPTORS 4
-#define NUM_NEUROMODULATORS 0
 
  //---------------------------------------
  // Synapse parameters

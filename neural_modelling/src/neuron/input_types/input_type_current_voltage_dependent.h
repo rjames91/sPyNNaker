@@ -13,19 +13,14 @@
        shaping include
 #endif
 
-#ifndef NUM_NEUROMODULATORS
-#define NUM_NEUROMODULATORS 0
-#error NUM_NEUROMODULATORS was undefined.  It should be defined by a synapse\
-       shaping include
-#endif
 
 #include "input_type.h"
 
 typedef struct input_type_t {
 } input_type_t;
 
-uint16_t excitatory_shifts[NUM_EXCITATORY_RECEPTORS] = {0, 0, 0};
-uint16_t inhibitory_shifts[NUM_INHIBITORY_RECEPTORS] = {0, 0, 0};
+uint16_t excitatory_shifts[NUM_EXCITATORY_RECEPTORS] = {0}; //, 0, 0};
+uint16_t inhibitory_shifts[NUM_INHIBITORY_RECEPTORS] = {0}; //, 0, 0};
 
 // Todo - write this data structure from python
 //excitatory_shifts[] = {0, 0, 0};
@@ -41,13 +36,14 @@ static inline s1615 _evaluate_v_effect(state_t v){
 
 // makes sense to remove this function, as any type-dependent scaling could be applied in the two functions below.
 // Further complicated by fact that you have to use this function of both excitatory and inhibitory synapses
-static inline input_t input_type_get_input_value(
-        input_t value, input_type_pointer_t input_type) {
+static inline input_t* input_type_get_input_value(
+        input_t* value, input_type_pointer_t input_type,
+		uint16_t num_receptors) {
     use(input_type);
-    return value;
+    return &value[0];
 }
 
-static inline input_t* input_type_convert_excitatory_input_to_current(
+static inline void input_type_convert_excitatory_input_to_current(
         input_t* exc_input, input_type_pointer_t input_type,
         state_t membrane_voltage) {
     use(input_type);
@@ -64,10 +60,9 @@ static inline input_t* input_type_convert_excitatory_input_to_current(
     	}
     }
 
-    return &exc_input[0];
 }
 
-static inline input_t* input_type_convert_inhibitory_input_to_current(
+static inline void input_type_convert_inhibitory_input_to_current(
         input_t* inh_input, input_type_pointer_t input_type,
         state_t membrane_voltage) {
     use(input_type);
@@ -78,8 +73,6 @@ static inline input_t* input_type_convert_inhibitory_input_to_current(
     	    inh_input[i] = inh_input[i] >> //input_type->
     	    		inhibitory_shifts[i];
     }
-
-    return &inh_input[0];
 }
 
 #endif // _INPUT_TYPE_CURRENT_VOLTAGE_DEPENDENT_H_
