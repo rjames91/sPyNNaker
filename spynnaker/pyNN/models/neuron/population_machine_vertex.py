@@ -42,14 +42,16 @@ class PopulationMachineVertex(
                ("SATURATION_COUNT", 1),
                ("BUFFER_OVERFLOW_COUNT", 2),
                ("CURRENT_TIMER_TIC", 3),
-               ("PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT", 4)])
+               ("PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT", 4),
+               ("MAX_SPIKES_IN_A_TICK", 5)])
 
     PROFILE_TAG_LABELS = {
         0: "TIMER",
         1: "DMA_READ",
         2: "INCOMING_SPIKE",
         3: "PROCESS_FIXED_SYNAPSES",
-        4: "PROCESS_PLASTIC_SYNAPSES"}
+        4: "PROCESS_PLASTIC_SYNAPSES",
+        5: "MAX_SPIKES_IN_A_TICK"}
 
     N_ADDITIONAL_PROVENANCE_DATA_ITEMS = len(EXTRA_PROVENANCE_DATA_ENTRIES)
 
@@ -115,6 +117,9 @@ class PopulationMachineVertex(
         n_plastic_saturations = provenance_data[
             self.EXTRA_PROVENANCE_DATA_ENTRIES.
             PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT.value]
+        max_spikes_in_a_tick = provenance_data[
+            self.EXTRA_PROVENANCE_DATA_ENTRIES.
+            MAX_SPIKES_IN_A_TICK.value]
 
         label, x, y, p, names = self._get_placement_details(placement)
 
@@ -157,6 +162,13 @@ class PopulationMachineVertex(
                 "spikes_per_second and / or ring_buffer_sigma values located "
                 "within the .spynnaker.cfg file.".format(
                     label, x, y, p, n_plastic_saturations))))
+        provenance_items.append(ProvenanceDataItem(
+            self._add_name(names, "Max_spikes_in_a_tick"),
+            max_spikes_in_a_tick,
+            report=max_spikes_in_a_tick > 0,
+            message=(
+                "Max spikes received between timer events for {} on {}, {}, {}, "
+                "was: {}".format(label, x, y, p, max_spikes_in_a_tick))))
 
         return provenance_items
 

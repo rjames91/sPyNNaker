@@ -37,7 +37,12 @@ static uint32_t single_fixed_synapse[4];
 uint32_t number_of_rewires=0;
 bool any_spike = false;
 
+// counter for number of spikes between timer events
+uint32_t spikes_this_tick = 0;
+
+
 /* PRIVATE FUNCTIONS - static for inlining */
+
 
 static inline void _do_dma_read(
         address_t row_address, size_t n_bytes_to_transfer) {
@@ -188,6 +193,8 @@ void _user_event_callback(uint unused0, uint unused1) {
 void _dma_complete_callback(uint unused, uint tag) {
     use(unused);
 
+    spikes_this_tick++;
+
     log_debug("DMA transfer complete with tag %u", tag);
 
     // Get pointer to current buffer
@@ -314,4 +321,12 @@ bool do_rewiring(int number_of_rew) {
 //! \return bool
 bool received_any_spike() {
     return any_spike;
+}
+
+uint32_t spike_processing_get_spikes_this_tick(){
+	return  spikes_this_tick;
+}
+
+void spike_processing_reset_spikes_this_tick(){
+	spikes_this_tick = 0;
 }

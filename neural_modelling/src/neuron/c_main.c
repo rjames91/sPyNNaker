@@ -55,7 +55,8 @@ typedef enum extra_provenance_data_region_entries{
     SYNAPTIC_WEIGHT_SATURATION_COUNT = 1,
     INPUT_BUFFER_OVERFLOW_COUNT = 2,
     CURRENT_TIMER_TICK = 3,
-	PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT = 4
+	PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT = 4,
+	MAX_SPIKES_IN_A_TICK = 5
 } extra_provenance_data_region_entries;
 
 //! values for the priority for each callback
@@ -67,6 +68,10 @@ typedef enum callback_priorities{
 #define NUMBER_OF_REGIONS_TO_RECORD 4
 
 // Globals
+
+// Counters to assess maximum spikes per timer tick
+uint32_t max_spikes_in_a_tick = 0;
+
 
 //! the current timer tick value
 //! the timer tick callback returning the same value.
@@ -117,6 +122,7 @@ void c_main_store_provenance_data(address_t provenance_region){
     provenance_region[CURRENT_TIMER_TICK] = time;
     provenance_region[PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT] =
     		synapse_dynamics_get_plastic_saturation_count();
+    provenance_region[MAX_SPIKES_IN_A_TICK] = max_spikes_in_a_tick;
     log_debug("finished other provenance data");
 }
 
@@ -244,6 +250,14 @@ void resume_callback() {
 void timer_callback(uint timer_count, uint unused) {
     use(timer_count);
     use(unused);
+
+    // Get number of spikes in last tick, and reset spike counter
+    uint32_t last_spikes = spike_processing_get_spikes_this_tick();
+
+    max_spikes_in_a_tick = (last_spikes > max_spikes_in_a_tick)?
+    		last_spikes : max_spikes_in_a_tick;
+
+    spike_processing_reset_spikes_this_tick();
 
     profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_TIMER);
 

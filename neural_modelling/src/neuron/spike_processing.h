@@ -58,4 +58,12 @@ void _setup_synaptic_dma_read();
 //! \return bool
 bool received_any_spike();
 
+//! \brief get number of spikes received since last tick
+//! \return uint32_t number of spikes
+uint32_t spike_processing_get_spikes_this_tick();
+
+//! \brief reset spikes per tick counter
+void spike_processing_reset_spikes_this_tick();
+
+
 #endif // _SPIKE_PROCESSING_H_
