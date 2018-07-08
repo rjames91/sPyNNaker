@@ -324,7 +324,7 @@ bool received_any_spike() {
 }
 
 uint32_t spike_processing_get_spikes_this_tick(){
-	return  spikes_this_tick;
+	return spikes_this_tick;
 }
 
 void spike_processing_reset_spikes_this_tick(){
