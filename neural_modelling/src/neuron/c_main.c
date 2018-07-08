@@ -16,6 +16,7 @@
  */
 
 #include <common/in_spikes.h>
+#include "regions.h"
 #include "neuron.h"
 #include "synapses.h"
 #include "spike_processing.h"
@@ -36,19 +37,6 @@
 #error APPLICATION_NAME_HASH was undefined.  Make sure you define this\
        constant
 #endif
-
-//! human readable definitions of each region in SDRAM
-typedef enum regions_e{
-    SYSTEM_REGION,
-    NEURON_PARAMS_REGION,
-    SYNAPSE_PARAMS_REGION,
-    POPULATION_TABLE_REGION,
-    SYNAPTIC_MATRIX_REGION,
-    SYNAPSE_DYNAMICS_REGION,
-    RECORDING_REGION,
-    PROVENANCE_DATA_REGION,
-    PROFILER_REGION
-} regions_e;
 
 typedef enum extra_provenance_data_region_entries{
     NUMBER_OF_PRE_SYNAPTIC_EVENT_COUNT = 0,
@@ -71,7 +59,6 @@ typedef enum callback_priorities{
 
 // Counters to assess maximum spikes per timer tick
 uint32_t max_spikes_in_a_tick = 0;
-
 
 //! the current timer tick value
 //! the timer tick callback returning the same value.
@@ -121,7 +108,7 @@ void c_main_store_provenance_data(address_t provenance_region){
         spike_processing_get_buffer_overflows();
     provenance_region[CURRENT_TIMER_TICK] = time;
     provenance_region[PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT] =
-    		synapse_dynamics_get_plastic_saturation_count();
+            synapse_dynamics_get_plastic_saturation_count();
     provenance_region[MAX_SPIKES_IN_A_TICK] = max_spikes_in_a_tick;
     log_debug("finished other provenance data");
 }
@@ -171,14 +158,15 @@ static bool initialise(uint32_t *timer_period) {
     // Set up the synapses
     synapse_param_t *neuron_synapse_shaping_params;
     uint32_t *ring_buffer_to_input_buffer_left_shifts;
-    address_t indirect_synapses_address;
+    address_t indirect_synapses_address = data_specification_get_region(
+        SYNAPTIC_MATRIX_REGION, address);
     address_t direct_synapses_address;
     if (!synapses_initialise(
             data_specification_get_region(SYNAPSE_PARAMS_REGION, address),
-            data_specification_get_region(SYNAPTIC_MATRIX_REGION, address),
+            data_specification_get_region(DIRECT_MATRIX_REGION, address),
             n_neurons, &neuron_synapse_shaping_params,
             &ring_buffer_to_input_buffer_left_shifts,
-            &indirect_synapses_address, &direct_synapses_address)) {
+            &direct_synapses_address)) {
         return false;
     }
 
