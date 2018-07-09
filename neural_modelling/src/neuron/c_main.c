@@ -290,14 +290,14 @@ void timer_callback(uint timer_count, uint unused) {
     // Do rewiring
     if (rewiring &&
 	    ((last_rewiring_time >= rewiring_period && !is_fast()) || is_fast())) {
-        update_goal_posts(time);
-        last_rewiring_time = 0;
+          update_goal_posts(time);
+          last_rewiring_time = 0;
         // put flag in spike processing to do synaptic rewiring
 //        synaptogenesis_dynamics_rewire(time);
         if (is_fast()) {
             do_rewiring(rewiring_period);
         } else {
-            do_rewiring(1);
+            do_rewiring(1);//only make a single rewire attempt
         }
         // disable interrupts
         cpsr = spin1_int_disable();
@@ -315,7 +315,7 @@ void timer_callback(uint timer_count, uint unused) {
         spin1_mode_restore(cpsr);
         count_rewires++;
     }
-    // otherwise do synapse and neuron time step updates
+    // now do synapse and neuron time step updates
     synapses_do_timestep_update(time);
     neuron_do_timestep_update(time);
 

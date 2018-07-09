@@ -35,7 +35,7 @@ static spike_t spike=-1;
 static uint32_t single_fixed_synapse[4];
 
 uint32_t number_of_rewires=0;
-bool any_spike = false;
+//bool any_spike = false;
 
 /* PRIVATE FUNCTIONS - static for inlining */
 
@@ -74,7 +74,7 @@ void _setup_synaptic_dma_read() {
     bool finished = false;
     uint cpsr = 0;
     while (!setup_done && !finished) {
-        if (number_of_rewires) {
+        if (number_of_rewires) {//if do_rewiring has been called
             number_of_rewires--;
             synaptogenesis_dynamics_rewire(time);
             setup_done = true;
@@ -102,7 +102,6 @@ void _setup_synaptic_dma_read() {
             // Decode spike to get address of destination synaptic row
             if (population_table_get_first_address(
                     spike, &row_address, &n_bytes_to_transfer)) {
-
                 // This is a direct row to process
                 if (n_bytes_to_transfer == 0) {
                     _do_direct_row(row_address);
@@ -119,7 +118,6 @@ void _setup_synaptic_dma_read() {
         }
         cpsr = spin1_int_disable();
     }
-
     // If the setup was not done, and there are no more spikes,
     // stop trying to set up synaptic DMAs
     if (!setup_done) {
@@ -155,12 +153,11 @@ static inline void _setup_synaptic_dma_write(uint32_t dma_buffer_index) {
 // Called when a multicast packet is received
 void _multicast_packet_received_callback(uint key, uint payload) {
     use(payload);
-    any_spike = true;
+    //any_spike = true;
     log_debug("Received spike %x at %d, DMA Busy = %d", key, time, dma_busy);
 
     // If there was space to add spike to incoming spike queue
     if (in_spikes_add_spike(key)) {
-
         // If we're not already processing synaptic DMAs,
         // flag pipeline as busy and trigger a feed event
         if (!dma_busy) {
@@ -312,6 +309,7 @@ bool do_rewiring(int number_of_rew) {
 
 //! \brief has this core received any spikes since the last batch of rewires?
 //! \return bool
-bool received_any_spike() {
-    return any_spike;
-}
+//bool received_any_spike() {
+//    return any_spike;
+//    //return in_spikes_not_empty();
+//}

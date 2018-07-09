@@ -89,6 +89,7 @@ typedef struct {
     uint32_t p_rew, fast, weight[2], g_max[2],delay, s_max, app_no_atoms,
         machine_no_atoms, low_atom, high_atom,
         size_ff_prob, size_lat_prob, grid_x, grid_y, p_elim_dep, p_elim_pot;
+    u032 p_form;
     // the 2 seeds that are used: shared for sync, local for everything else
     mars_kiss64_seed_t shared_seed, local_seed;
     // information about all pre-synaptic sub-populations eligible for rewiring
@@ -102,7 +103,7 @@ typedef struct {
     int32_t lateral_inhibition, random_partner;
 } rewiring_data_t;
 
-// the instantiation of the previous truct
+// the instantiation of the previous struct
 rewiring_data_t rewiring_data;
 
 // dma_buffer defined in spike_processing.h
@@ -229,6 +230,8 @@ address_t synaptogenesis_dynamics_initialise(address_t sdram_sp_address)
 
     rewiring_data.pre_pop_info_table.no_pre_pops = *sp_word++;
 
+    rewiring_data.p_form = ulrbits(0xFFFFFFFF>>(32-rewiring_data.machine_no_atoms));
+
     // Need to malloc space for subpop_info, i.e. an array
     // containing information for each pre-synaptic application vertex
     if (!rewiring_data.pre_pop_info_table.no_pre_pops) {
@@ -322,9 +325,10 @@ address_t synaptogenesis_dynamics_initialise(address_t sdram_sp_address)
 //! between which we will be looking at the next batch of attempts
 void update_goal_posts(uint32_t time) {
     use(time);
-    if (!received_any_spike()) {
-        return;
-    }
+    //TODO:any_spike doesn't seem to ever be reset to false
+//    if (!received_any_spike()) {
+//        return;
+//    }
     current_state.cb = get_circular_buffer();
     current_state.cb_total_size = circular_buffer_real_size(current_state.cb);
 
@@ -333,6 +337,8 @@ void update_goal_posts(uint32_t time) {
 	    circular_buffer_input(current_state.cb)
 	    & current_state.cb_total_size);
 
+    //calculates how many elements have been filled in the circular buffer since
+    //the last time this code was executed
     current_state.no_spike_in_interval = (
 	    current_state.my_cb_input >= current_state.my_cb_output
 	    ? current_state.my_cb_input - current_state.my_cb_output
@@ -362,16 +368,8 @@ void synaptogenesis_dynamics_rewire(uint32_t time)
 
     // Randomly choose a postsynaptic (application neuron)
     uint32_t post_id;
-    post_id = ulrbits(mars_kiss64_seed(rewiring_data.shared_seed)) *
-	    rewiring_data.app_no_atoms;
-
-    // Check if neuron is in the current machine vertex
-    if (post_id < rewiring_data.low_atom ||
-	    post_id > rewiring_data.high_atom) {
-        _setup_synaptic_dma_read();
-        return;
-    }
-    post_id -= rewiring_data.low_atom;
+    post_id = ulrbits(mars_kiss64_seed(rewiring_data.local_seed)) *
+	    rewiring_data.machine_no_atoms;
 
     uint pre_app_pop = 0, pre_sub_pop = 0, choice = 0;
     bool element_exists = false;
@@ -385,6 +383,7 @@ void synaptogenesis_dynamics_rewire(uint32_t time)
     int value = rewiring_data.post_to_pre_table[total_offset];
     current_state.offset_in_table = total_offset;
 
+    //check if the randomly chosen connection doesn't already exist
     element_exists = unpack_post_to_pre(value, &pre_app_pop,
 	    &pre_sub_pop, &choice);
 
@@ -392,9 +391,11 @@ void synaptogenesis_dynamics_rewire(uint32_t time)
     spike_t _spike = ANY_SPIKE;
     if (!element_exists && !rewiring_data.random_partner) {
         // Retrieve the last spike
-        if (received_any_spike()) {
-            _spike = select_last_spike();
-        }
+//        if (received_any_spike()) {
+//            _spike = select_last_spike();
+//        }
+        _spike = select_last_spike();
+
         if (_spike == ANY_SPIKE) {
             log_debug("No previous spikes");
             _setup_synaptic_dma_read();
@@ -635,11 +636,10 @@ bool synaptogenesis_dynamics_formation_rule(void)
 //    } else {
 //        probability = rewiring_data.lat_probabilities[current_state.distance];
 //    }
-//    uint16_t r = ulrbits(mars_kiss64_seed(rewiring_data.local_seed)) *
-//            MAX_SHORT;
-//    if (r > probability) {
-//        return false;
-//    }
+    u032 r = ulrbits(mars_kiss64_seed(rewiring_data.local_seed));
+    if (r > rewiring_data.p_form) {
+        return false;
+    }
     int appr_scaled_weight = rewiring_data.weight[current_state.connection_type];
 
     if (!add_neuron(current_state.post_syn_id, rewiring_dma_buffer.row,
