@@ -165,7 +165,7 @@ class PopulationMachineVertex(
         provenance_items.append(ProvenanceDataItem(
             self._add_name(names, "Max_spikes_in_a_tick"),
             max_spikes_in_a_tick,
-            report=max_spikes_in_a_tick > 0,
+            report=max_spikes_in_a_tick > -1,
             message=(
                 "Max spikes received between timer events for {} on {}, {}, "
                 "{}, was: {}".format(label, x, y, p, max_spikes_in_a_tick))))

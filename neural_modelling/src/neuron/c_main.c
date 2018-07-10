@@ -220,6 +220,10 @@ static bool initialise(uint32_t *timer_period) {
 void resume_callback() {
     recording_reset();
 
+    // reset high water mark for spike counter
+    max_spikes_in_a_tick = 0;
+    spike_processing_get_and_reset_spikes_this_tick();
+
     // try reloading neuron parameters
     address_t address = data_specification_get_data_address();
     if (!neuron_reload_neuron_parameters(
@@ -262,10 +266,6 @@ void timer_callback(uint timer_count, uint unused) {
     if (infinite_run != TRUE && time >= simulation_ticks) {
 
         log_debug("Completed a run");
-
-
-       // reset max_spikes_per_tick high_water mark
-        max_spikes_in_a_tick = 0;
 
         // rewrite neuron params to SDRAM for reading out if needed
         address_t address = data_specification_get_data_address();
