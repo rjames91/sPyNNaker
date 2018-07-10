@@ -106,6 +106,9 @@ uint32_t count_rewires = 0;
 static bool initialise_recording(address_t recording_address){
     bool success = recording_initialize(recording_address, &recording_flags);
     log_debug("Recording flags = 0x%08x", recording_flags);
+    // reset high water mark for spike counter
+    max_spikes_in_a_tick = 0;
+    spike_processing_get_and_reset_spikes_this_tick();
     return success;
 }
 
@@ -274,10 +277,6 @@ void timer_callback(uint timer_count, uint unused) {
     if (infinite_run != TRUE && time >= simulation_ticks) {
 
         log_debug("Completed a run");
-
-
-       // reset max_spikes_per_tick high_water mark
-        max_spikes_in_a_tick = 0;
 
         // rewrite neuron params to SDRAM for reading out if needed
         address_t address = data_specification_get_data_address();
