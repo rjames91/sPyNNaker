@@ -252,12 +252,11 @@ void timer_callback(uint timer_count, uint unused) {
     use(unused);
 
     // Get number of spikes in last tick, and reset spike counter
-    uint32_t last_spikes = spike_processing_get_spikes_this_tick();
+    uint32_t last_spikes = spike_processing_get_and_reset_spikes_this_tick();
 
     max_spikes_in_a_tick = (last_spikes > max_spikes_in_a_tick)?
     		last_spikes : max_spikes_in_a_tick;
 
-    spike_processing_reset_spikes_this_tick();
 
     profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_TIMER);
 

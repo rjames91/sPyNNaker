@@ -323,10 +323,11 @@ bool received_any_spike() {
     return any_spike;
 }
 
-uint32_t spike_processing_get_spikes_this_tick(){
-	return spikes_this_tick;
+uint32_t spike_processing_get_and_reset_spikes_this_tick(){
+
+	uint32_t to_return = spikes_this_tick;
+	spikes_this_tick = 0;
+
+	return to_return;
 }
 
-void spike_processing_reset_spikes_this_tick(){
-	spikes_this_tick = 0;
-}
