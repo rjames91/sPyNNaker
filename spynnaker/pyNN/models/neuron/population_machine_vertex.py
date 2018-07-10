@@ -167,8 +167,8 @@ class PopulationMachineVertex(
             max_spikes_in_a_tick,
             report=max_spikes_in_a_tick > 0,
             message=(
-                "Max spikes received between timer events for {} on {}, {}, {}, "
-                "was: {}".format(label, x, y, p, max_spikes_in_a_tick))))
+                "Max spikes received between timer events for {} on {}, {}, "
+                "{}, was: {}".format(label, x, y, p, max_spikes_in_a_tick))))
 
         return provenance_items
 
