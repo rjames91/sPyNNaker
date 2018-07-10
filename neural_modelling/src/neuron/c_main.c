@@ -275,6 +275,10 @@ void timer_callback(uint timer_count, uint unused) {
 
         log_debug("Completed a run");
 
+
+       // reset max_spikes_per_tick high_water mark
+        max_spikes_in_a_tick = 0;
+
         // rewrite neuron params to SDRAM for reading out if needed
         address_t address = data_specification_get_data_address();
         neuron_store_neuron_parameters(
