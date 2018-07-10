@@ -106,9 +106,6 @@ uint32_t count_rewires = 0;
 static bool initialise_recording(address_t recording_address){
     bool success = recording_initialize(recording_address, &recording_flags);
     log_debug("Recording flags = 0x%08x", recording_flags);
-    // reset high water mark for spike counter
-    max_spikes_in_a_tick = 0;
-    spike_processing_get_and_reset_spikes_this_tick();
     return success;
 }
 
@@ -234,6 +231,10 @@ static bool initialise(uint32_t *timer_period) {
 //! \return None
 void resume_callback() {
     recording_reset();
+
+    // reset high water mark for spike counter
+    max_spikes_in_a_tick = 0;
+    spike_processing_get_and_reset_spikes_this_tick();
 
     // try reloading neuron parameters
     address_t address = data_specification_get_data_address();
