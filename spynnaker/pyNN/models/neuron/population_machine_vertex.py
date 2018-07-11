@@ -50,8 +50,7 @@ class PopulationMachineVertex(
         1: "DMA_READ",
         2: "INCOMING_SPIKE",
         3: "PROCESS_FIXED_SYNAPSES",
-        4: "PROCESS_PLASTIC_SYNAPSES",
-        5: "MAX_SPIKES_IN_A_TICK"}
+        4: "PROCESS_PLASTIC_SYNAPSES"}
 
     N_ADDITIONAL_PROVENANCE_DATA_ITEMS = len(EXTRA_PROVENANCE_DATA_ENTRIES)
 
@@ -155,7 +154,7 @@ class PopulationMachineVertex(
             self._add_name(names,
                            "Times_plastic_synaptic_weights_have_saturated"),
             n_plastic_saturations,
-            report=n_plastic_saturations > 0,
+            report=n_plastic_saturations > -1,
             message=(
                 "The weights from the plastic synapses for {} on {}, {}, {} "
                 "saturated {} times. If this causes issue increase the "
