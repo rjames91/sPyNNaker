@@ -43,7 +43,9 @@ class PopulationMachineVertex(
                ("BUFFER_OVERFLOW_COUNT", 2),
                ("CURRENT_TIMER_TIC", 3),
                ("PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT", 4),
-               ("MAX_SPIKES_IN_A_TICK", 5)])
+               ("MAX_SPIKES_IN_A_TICK", 5),
+               ("MAX_DMAS_IN_A_TICK", 6)
+               ])
 
     PROFILE_TAG_LABELS = {
         0: "TIMER",
@@ -119,6 +121,9 @@ class PopulationMachineVertex(
         max_spikes_in_a_tick = provenance_data[
             self.EXTRA_PROVENANCE_DATA_ENTRIES.
             MAX_SPIKES_IN_A_TICK.value]
+        max_dmas_in_a_tick = provenance_data[
+            self.EXTRA_PROVENANCE_DATA_ENTRIES.
+            MAX_DMAS_IN_A_TICK.value]
 
         label, x, y, p, names = self._get_placement_details(placement)
 
@@ -166,8 +171,8 @@ class PopulationMachineVertex(
             max_spikes_in_a_tick,
             report=max_spikes_in_a_tick > -1,
             message=(
-                "Max spikes received between timer events for {} on {}, {}, "
-                "{}, was: {}".format(label, x, y, p, max_spikes_in_a_tick))))
+                "Max spikes, dmas received between timer events for {} on "
+                "{}, was: {}, {}".format(label, p, max_spikes_in_a_tick, max_dmas_in_a_tick))))
 
         return provenance_items
 
