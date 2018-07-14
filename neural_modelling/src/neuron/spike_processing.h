@@ -62,4 +62,8 @@ bool received_any_spike();
 //! \return uint32_t number of spikes
 uint32_t spike_processing_get_and_reset_spikes_this_tick();
 
+//! \brief get number of dmas completed since last tick
+//! \return uint32_t number of DMAs
+uint32_t spike_processing_get_and_reset_dmas_this_tick();
+
 #endif // _SPIKE_PROCESSING_H_

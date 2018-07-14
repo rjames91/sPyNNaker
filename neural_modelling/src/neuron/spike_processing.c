@@ -39,6 +39,7 @@ bool any_spike = false;
 
 // counter for number of spikes between timer events
 uint32_t spikes_this_tick = 0;
+uint32_t dmas_this_tick = 0;
 
 
 /* PRIVATE FUNCTIONS - static for inlining */
@@ -71,7 +72,11 @@ static inline void _do_direct_row(address_t row_address) {
 
 void _setup_synaptic_dma_read() {
 
-    // Set up to store the DMA location and size to read
+
+	// put spike counter here, to avoid packet-received callback becoming bloated
+	//spikes_this_tick+=1;
+
+	// Set up to store the DMA location and size to read
     address_t row_address;
     size_t n_bytes_to_transfer;
 
@@ -163,6 +168,8 @@ void _multicast_packet_received_callback(uint key, uint payload) {
     any_spike = true;
     log_debug("Received spike %x at %d, DMA Busy = %d", key, time, dma_busy);
 
+    spikes_this_tick++;
+
     // If there was space to add spike to incoming spike queue
     if (in_spikes_add_spike(key)) {
 
@@ -193,7 +200,7 @@ void _user_event_callback(uint unused0, uint unused1) {
 void _dma_complete_callback(uint unused, uint tag) {
     use(unused);
 
-    spikes_this_tick++;
+    dmas_this_tick+=1;
 
     log_debug("DMA transfer complete with tag %u", tag);
 
@@ -331,3 +338,10 @@ uint32_t spike_processing_get_and_reset_spikes_this_tick(){
 	return to_return;
 }
 
+uint32_t spike_processing_get_and_reset_dmas_this_tick(){
+
+	uint32_t to_return = dmas_this_tick;
+	dmas_this_tick = 0;
+
+	return to_return;
+}
