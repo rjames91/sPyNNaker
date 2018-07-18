@@ -68,6 +68,7 @@ static inline void _do_dma_read(
 static inline void _do_direct_row(address_t row_address) {
     single_fixed_synapse[3] = (uint32_t) row_address[0];
     synapses_process_synaptic_row(time, single_fixed_synapse, false, 0);
+    dmas_this_tick+=1;
 }
 
 void _setup_synaptic_dma_read() {
@@ -200,7 +201,6 @@ void _user_event_callback(uint unused0, uint unused1) {
 void _dma_complete_callback(uint unused, uint tag) {
     use(unused);
 
-    dmas_this_tick+=1;
 
     log_debug("DMA transfer complete with tag %u", tag);
 
