@@ -99,7 +99,7 @@ uint32_t count_rewires = 0;
 
 
 //! \brief Initialises the recording parts of the model
-//! \param[in] recording_address: the address in sdram where to store
+//! \param[in] recording_address: the address in SDRAM where to store
 //! recordings
 //! \return True if recording initialisation is successful, false otherwise
 static bool initialise_recording(address_t recording_address){
@@ -228,7 +228,7 @@ static bool initialise(uint32_t *timer_period) {
 }
 
 //! \brief the function to call when resuming a simulation
-//! return None
+//! \return None
 void resume_callback() {
     recording_reset();
 
@@ -251,7 +251,6 @@ void timer_callback(uint timer_count, uint unused) {
     use(timer_count);
     use(unused);
 
-
     profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_TIMER);
 
     time++;
@@ -261,6 +260,7 @@ void timer_callback(uint timer_count, uint unused) {
     //   from the circular buffer
     // If time == 0 as well as output == input == 0  then no rewire is
     //   supposed to happen. No spikes yet
+    log_debug("Timer tick %u \n", time);
 
     /* if a fixed number of simulation ticks that were specified at startup
        then do reporting for finishing */
@@ -276,7 +276,7 @@ void timer_callback(uint timer_count, uint unused) {
         }
 
 
-        // rewrite neuron params to sdram for reading out if needed
+        // rewrite neuron params to SDRAM for reading out if needed
         address_t address = data_specification_get_data_address();
         neuron_store_neuron_parameters(
             data_specification_get_region(NEURON_PARAMS_REGION, address));
@@ -299,7 +299,7 @@ void timer_callback(uint timer_count, uint unused) {
         time -= 1;
 
         log_debug("Rewire tries = %d", count_rewires);
-        log_info("Exiting - Completion of Callback");
+
         return;
     }
 
@@ -334,7 +334,6 @@ void timer_callback(uint timer_count, uint unused) {
     }
     // otherwise do synapse and neuron time step updates
     synapses_do_timestep_update(time);
-
     neuron_do_timestep_update(time);
 
     // trigger buffering_out_mechanism
@@ -343,8 +342,6 @@ void timer_callback(uint timer_count, uint unused) {
     }
 
     profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_TIMER);
-
-//    log_info("t_ev_ended: %u", tc[T1_COUNT]);
 }
 
 //! \brief The entry point for this model.
