@@ -14,10 +14,7 @@
 #include "structural_plasticity/synaptogenesis_dynamics.h"
 #include <common/out_spikes.h>
 #include <recording.h>
-#include "./profile_tags.h"
 #include <debug.h>
-#include <string.h>
-#include <profiler.h>
 
 // declare spin1_wfi
 void spin1_wfi();
@@ -54,7 +51,7 @@ static threshold_type_pointer_t threshold_type_array;
 //! Global parameters for the neurons
 static global_neuron_params_pointer_t global_parameters;
 
-//! The key to be used for this core (will be ORed with neuron id)
+//! The key to be used for this core (will be ORed with neuron ID)
 static key_t key;
 
 //! A checker that says if this model should be transmitting. If set to false
@@ -457,8 +454,8 @@ bool neuron_initialise(address_t address, uint32_t recording_flags_param,
     return true;
 }
 
-//! \brief stores neuron parameter back into sdram
-//! \param[in] address: the address in sdram to start the store
+//! \brief stores neuron parameter back into SDRAM
+//! \param[in] address: the address in SDRAM to start the store
 void neuron_store_neuron_parameters(address_t address){
 
     uint32_t next = START_OF_GLOBAL_PARAMETERS;
@@ -515,8 +512,6 @@ void recording_done_callback() {
 //! has occurred.
 //! \param[in] time the timer tick  value currently being executed
 void neuron_do_timestep_update(timer_t time) {
-//    log_info("tc s: %u",tc[T1_COUNT]);
-    profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_TIMER_NEURON_UPDATE);
 
     // Wait a random number of clock cycles
     uint32_t random_backoff_time = tc[T1_COUNT] - random_backoff;
@@ -702,7 +697,4 @@ void neuron_do_timestep_update(timer_t time) {
 
     // Re-enable interrupts
     spin1_mode_restore(cpsr);
-
-//    log_info("tc f: %u",tc[T1_COUNT]);
-    profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_TIMER_NEURON_UPDATE);
 }
