@@ -43,8 +43,11 @@ class PopulationMachineVertex(
                ("BUFFER_OVERFLOW_COUNT", 2),
                ("CURRENT_TIMER_TIC", 3),
                ("PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT", 4),
-               ("MAX_SPIKES_IN_A_TICK", 5),
-               ("MAX_DMAS_IN_A_TICK", 6)
+               ("MAX_SPIKES_BETWEEN_TIMER_EVENTS", 5),
+               ("MAX_DMAS_BETWEEN_TIMER_EVENTS", 6),
+               ("MAX_PIPELINE_RESTARTS_BETWEEN_TIMER_EVENTS", 7),
+               ("TIMER_CALLBACK_COMPLETED_TIME", 8),
+               ("SPIKE_PIPELINE_DEACTIVATED_TIME", 9)
                ])
 
     PROFILE_TAG_LABELS = {
@@ -120,10 +123,19 @@ class PopulationMachineVertex(
             PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT.value]
         max_spikes_in_a_tick = provenance_data[
             self.EXTRA_PROVENANCE_DATA_ENTRIES.
-            MAX_SPIKES_IN_A_TICK.value]
+            MAX_SPIKES_BETWEEN_TIMER_EVENTS.value]
         max_dmas_in_a_tick = provenance_data[
             self.EXTRA_PROVENANCE_DATA_ENTRIES.
-            MAX_DMAS_IN_A_TICK.value]
+            MAX_DMAS_BETWEEN_TIMER_EVENTS.value]
+        max_pipeline_restarts_between_ticks = provenance_data[
+            self.EXTRA_PROVENANCE_DATA_ENTRIES.
+            MAX_PIPELINE_RESTARTS_BETWEEN_TIMER_EVENTS.value]
+        timer_callback_complete = provenance_data[
+            self.EXTRA_PROVENANCE_DATA_ENTRIES.
+            TIMER_CALLBACK_COMPLETED_TIME.value]
+        spike_pipeline_deactivated = provenance_data[
+            self.EXTRA_PROVENANCE_DATA_ENTRIES.
+            SPIKE_PIPELINE_DEACTIVATED_TIME.value]
 
         label, x, y, p, names = self._get_placement_details(placement)
 
@@ -171,8 +183,11 @@ class PopulationMachineVertex(
             max_spikes_in_a_tick,
             report=max_spikes_in_a_tick > -1,
             message=(
-                "Max spikes, dmas received between timer events for {} on "
-                "{}, was: {}, {}".format(label, p, max_spikes_in_a_tick, max_dmas_in_a_tick))))
+                "Max spikes, dmas, pipeline_restarts, syn_events between timer "
+                "events for {} on {}, {}, {}, was: {}, {}, {}, {}, {}, {}".format(label, x, y, p,
+                    max_spikes_in_a_tick, max_dmas_in_a_tick,
+                    max_pipeline_restarts_between_ticks, n_pre_synaptic_events,
+                    timer_callback_complete, spike_pipeline_deactivated))))
 
         return provenance_items
 

@@ -56,8 +56,11 @@ typedef enum extra_provenance_data_region_entries{
     INPUT_BUFFER_OVERFLOW_COUNT = 2,
     CURRENT_TIMER_TICK = 3,
 	PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT = 4,
-	MAX_SPIKES_IN_A_TICK = 5,
-	MAX_DMAS_IN_A_TICK = 6
+	MAX_SPIKES_BETWEEN_TIMER_EVENTS = 5,
+	MAX_DMAS_BETWEEN_TIMER_EVENTS = 6,
+	MAX_SPIKE_PIPELINE_RESTARTS_BETWEEN_TIMER_EVENTS = 7,
+	TIMER_CALLBACK_COMPLETED = 8,
+	SPIKE_PIPELINE_DEACTIVATED = 9
 } extra_provenance_data_region_entries;
 
 //! values for the priority for each callback
@@ -73,6 +76,12 @@ typedef enum callback_priorities{
 // Counters to assess maximum spikes per timer tick
 uint32_t max_spikes_in_a_tick = 0;
 uint32_t max_dmas_in_a_tick = 0;
+uint32_t max_pipeline_restarts = 0;
+
+uint32_t timer_callback_completed = 0;
+uint32_t temp_timer_callback_completed = 0;
+uint32_t spike_pipeline_deactivated = 0;
+
 
 //! the current timer tick value
 //! the timer tick callback returning the same value.
@@ -123,9 +132,12 @@ void c_main_store_provenance_data(address_t provenance_region){
     provenance_region[CURRENT_TIMER_TICK] = time;
     provenance_region[PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT] =
     		synapse_dynamics_get_plastic_saturation_count();
-    provenance_region[MAX_SPIKES_IN_A_TICK] = max_spikes_in_a_tick;
-    provenance_region[MAX_DMAS_IN_A_TICK] = max_dmas_in_a_tick;
-
+    provenance_region[MAX_SPIKES_BETWEEN_TIMER_EVENTS] = max_spikes_in_a_tick;
+    provenance_region[MAX_DMAS_BETWEEN_TIMER_EVENTS] = max_dmas_in_a_tick;
+    provenance_region[MAX_SPIKE_PIPELINE_RESTARTS_BETWEEN_TIMER_EVENTS]
+					  = max_pipeline_restarts;
+    provenance_region[TIMER_CALLBACK_COMPLETED] = timer_callback_completed;
+    provenance_region[SPIKE_PIPELINE_DEACTIVATED] = spike_pipeline_deactivated;
     log_debug("finished other provenance data");
 }
 
@@ -238,8 +250,11 @@ void resume_callback() {
     // reset high water mark for spike counter
     max_spikes_in_a_tick = 0;
     max_dmas_in_a_tick = 0;
+    max_pipeline_restarts = 0;
+
     spike_processing_get_and_reset_spikes_this_tick();
     spike_processing_get_and_reset_dmas_this_tick();
+    spike_processing_get_and_reset_pipeline_restarts_this_tick();
 
     // try reloading neuron parameters
     address_t address = data_specification_get_data_address();
@@ -263,11 +278,24 @@ void timer_callback(uint timer_count, uint unused) {
     // Get number of spikes in last tick, and reset spike counter
     uint32_t last_spikes = spike_processing_get_and_reset_spikes_this_tick();
     uint32_t last_dmas = spike_processing_get_and_reset_dmas_this_tick();
+    uint32_t last_restarts =
+    		spike_processing_get_and_reset_pipeline_restarts_this_tick();
+    uint32_t deactivation_time = spike_processing_get_pipeline_deactivation_time();
 
-    max_spikes_in_a_tick = (last_spikes > max_spikes_in_a_tick)?
-    		last_spikes : max_spikes_in_a_tick;
-    max_dmas_in_a_tick = (last_dmas > max_dmas_in_a_tick)?
-    		last_dmas : max_dmas_in_a_tick;
+    if (last_spikes > max_spikes_in_a_tick){
+    	max_spikes_in_a_tick = last_spikes;
+    	max_dmas_in_a_tick = last_dmas;
+    	max_pipeline_restarts = last_restarts;
+    	timer_callback_completed = temp_timer_callback_completed;
+    	spike_pipeline_deactivated = deactivation_time;
+    }
+//
+//    max_spikes_in_a_tick = (last_spikes > max_spikes_in_a_tick)?
+//    		last_spikes : max_spikes_in_a_tick;
+//    max_dmas_in_a_tick = (last_dmas > max_dmas_in_a_tick)?
+//    		last_dmas : max_dmas_in_a_tick;
+//    max_pipeline_restarts = (last_restarts > max_pipeline_restarts)?
+//    		last_restarts : max_pipeline_restarts;
 
 
     profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_TIMER);
@@ -352,6 +380,7 @@ void timer_callback(uint timer_count, uint unused) {
         recording_do_timestep_update(time);
     }
 
+    temp_timer_callback_completed = tc[T1_COUNT];
     profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_TIMER);
 }
 
