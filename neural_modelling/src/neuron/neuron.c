@@ -608,7 +608,7 @@ void neuron_do_timestep_update(timer_t time) {
             neuron_model_has_spiked(neuron);
 
             // Tell the additional input
-            additional_input_has_spiked(additional_input);
+            additional_input_has_spiked(additional_input, neuron, neuron_array, n_neurons);
 
             // Do any required synapse processing
             synapse_dynamics_process_post_synaptic_event(time, neuron_index);
