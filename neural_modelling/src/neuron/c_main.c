@@ -68,8 +68,8 @@ typedef enum callback_priorities{
 #define NUMBER_OF_REGIONS_TO_RECORD 4
 
 // Globals
-uint32_t measurement_in[100];
-uint32_t measurement_out[100];
+uint32_t measurement_in[200];
+uint32_t measurement_out[200];
 uint32_t measure_index = 0 ;
 
 //! the current timer tick value
@@ -251,6 +251,9 @@ void timer_callback(uint timer_count, uint unused) {
     use(timer_count);
     use(unused);
 
+//    // Profile Timer Update
+//    measurement_in[measure_index] = tc[T2_COUNT];
+
     profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_TIMER);
 
     time++;
@@ -268,7 +271,7 @@ void timer_callback(uint timer_count, uint unused) {
 
         log_info("Completed a run");
 
-        for (int i=0; i< 100; i++){
+        for (int i=0; i< 200; i++){
         	log_info("In: %u  Out: %u  Diff: %u",
         			measurement_in[i],
 					measurement_out[i],
@@ -340,6 +343,14 @@ void timer_callback(uint timer_count, uint unused) {
     if (recording_flags > 0) {
         recording_do_timestep_update(time);
     }
+
+//    // Profile Timer Update
+//    measurement_out[measure_index] = tc[T2_COUNT];
+//    measure_index++;
+
+//    while (tc[T1_COUNT] > 10000){
+//    	// do nothing
+//    }
 
     profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_TIMER);
 }

@@ -13,8 +13,8 @@
 #endif
 
 
-extern uint32_t measurement_in[100];
-extern uint32_t measurement_out[100];
+extern uint32_t measurement_in[200];
+extern uint32_t measurement_out[200];
 extern uint32_t measure_index;
 
 // Globals required for synapse benchmarking to work.
