@@ -7,8 +7,8 @@
 #include <spin1_api.h>
 #include <debug.h>
 
-extern uint32_t measurement_in[200];
-extern uint32_t measurement_out[200];
+extern uint32_t measurement_in[1028];
+extern uint32_t measurement_out[1028];
 extern uint32_t measure_index;
 
 // The number of DMA Buffers to use
@@ -46,7 +46,7 @@ bool any_spike = false;
 static inline void _do_dma_read(
         address_t row_address, size_t n_bytes_to_transfer) {
 
-//	// Profile Do DMA Read
+//	// Profile Do Setup DMA
 //	measurement_in[measure_index] = tc[T2_COUNT];
 
     // Write the SDRAM address of the plastic region and the
@@ -65,13 +65,13 @@ static inline void _do_dma_read(
         n_bytes_to_transfer);
     next_buffer_to_fill = (next_buffer_to_fill + 1) % N_DMA_BUFFERS;
 
-//        // Profile Do DMA Read
+//        // Profile Do Setup DMA
 //        measurement_out[measure_index] = tc[T2_COUNT];
 //        measure_index++;
 
 //    // Measure directly the time of DMA from DMA controller
 //    measurement_in[measure_index] = tc[T2_COUNT];
-//
+
 //    // wait until DMA transfer is complete
 //    while ((dma[DMA_STAT] & 1) == 1){
 //    	// do nothing
@@ -228,17 +228,17 @@ void _user_event_callback(uint unused0, uint unused1) {
 //    measurement_out[measure_index] = tc[T2_COUNT];
 //    measure_index++;
 
-	// Profile DMA Time
-	measurement_in[measure_index] = tc[T2_COUNT];
+//	// Profile DMA Time (also in pipeline)
+//	measurement_in[measure_index] = tc[T2_COUNT];
 }
 
 // Called when a DMA completes
 void _dma_complete_callback(uint unused, uint tag) {
     use(unused);
 
-    // Profile Do DMA Time
-    measurement_out[measure_index] = tc[T2_COUNT];
-    measure_index++;
+//    // Profile Do DMA Time (also in pipeline)
+//    measurement_out[measure_index] = tc[T2_COUNT];
+//    measure_index++;
 
 //    // Profile DMA Complete Callback
 //    measurement_in[measure_index] = tc[T2_COUNT];
@@ -249,6 +249,9 @@ void _dma_complete_callback(uint unused, uint tag) {
     // Get pointer to current buffer
     uint32_t current_buffer_index = buffer_being_read;
     dma_buffer *current_buffer = &dma_buffers[current_buffer_index];
+
+    // Start the next DMA transfer, so it is complete when we are finished
+    _setup_synaptic_dma_read();
 
     // Process synaptic row repeatedly
     bool subsequent_spikes;
@@ -284,15 +287,15 @@ void _dma_complete_callback(uint unused, uint tag) {
 //    measurement_out[measure_index] = tc[T2_COUNT];
 //    measure_index++;
 
-    // Start the next DMA transfer, so it is complete when we are finished
-    _setup_synaptic_dma_read();
+//    // Start the next DMA transfer, so it is complete when we are finished
+//    _setup_synaptic_dma_read();
 
 //    // Profile DMA Complete Callback
 //    measurement_out[measure_index] = tc[T2_COUNT];
 //    measure_index++;
 
-	// Profile DMA Time (in pipeline)
-	measurement_in[measure_index] = tc[T2_COUNT];
+//	// Profile DMA Time (in pipeline)
+//	measurement_in[measure_index] = tc[T2_COUNT];
 
 }
 

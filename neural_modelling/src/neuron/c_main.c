@@ -68,8 +68,8 @@ typedef enum callback_priorities{
 #define NUMBER_OF_REGIONS_TO_RECORD 4
 
 // Globals
-uint32_t measurement_in[200];
-uint32_t measurement_out[200];
+uint32_t measurement_in[1028];
+uint32_t measurement_out[1028];
 uint32_t measure_index = 0 ;
 
 //! the current timer tick value
@@ -271,7 +271,7 @@ void timer_callback(uint timer_count, uint unused) {
 
         log_info("Completed a run");
 
-        for (int i=0; i< 200; i++){
+        for (int i=0; i< 1028; i++){
         	log_info("In: %u  Out: %u  Diff: %u",
         			measurement_in[i],
 					measurement_out[i],
@@ -339,12 +339,18 @@ void timer_callback(uint timer_count, uint unused) {
     synapses_do_timestep_update(time);
     neuron_do_timestep_update(time);
 
+
+
+
     // trigger buffering_out_mechanism
     if (recording_flags > 0) {
         recording_do_timestep_update(time);
     }
 
-//    // Profile Timer Update
+//    // Profile Profiler Cost
+//    measurement_in[measure_index] = tc[T2_COUNT];
+//
+//    // Profile Profiler Cost
 //    measurement_out[measure_index] = tc[T2_COUNT];
 //    measure_index++;
 

@@ -27,6 +27,12 @@ static uint32_t last_neuron_id = 0;
 static uint16_t next_item = 0;
 static uint16_t items_to_go = 0;
 
+// Profiler datastructures
+extern uint32_t measurement_in[1028];
+extern uint32_t measurement_out[1028];
+extern uint32_t measure_index;
+
+
 static inline uint32_t _get_direct_address(address_and_row_length entry) {
 
     // Direct row address is just the direct address bit
@@ -144,9 +150,10 @@ bool population_table_initialise(
 bool population_table_get_first_address(
         spike_t spike, address_t* row_address, size_t* n_bytes_to_transfer) {
 
-//    profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_POP_TABLE_GET_FIRST);
+	// Profile Population Table Get First
+	measurement_in[measure_index] = tc[T2_COUNT];
 
-    uint32_t imin = 0;
+	uint32_t imin = 0;
     uint32_t imax = master_population_table_length;
 
     while (imin < imax) {
@@ -168,10 +175,14 @@ bool population_table_get_first_address(
                 "spike = %08x, entry_index = %u, start = %u, count = %u",
                 spike, imid, next_item, items_to_go);
 
-//            profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_POP_TABLE_GET_FIRST);
+            // Measure directly the time of DMA from DMA controller
+            measurement_out[measure_index] = tc[T2_COUNT];
+            measure_index++;
 
             return population_table_get_next_address(
                 row_address, n_bytes_to_transfer);
+
+
         } else if (entry.key < spike) {
 
             // Entry must be in upper part of the table
@@ -185,11 +196,11 @@ bool population_table_get_first_address(
 
     ghost_pop_table_searches ++;
     log_debug("Ghost searches: %u", ghost_pop_table_searches);
-    log_info(
+    log_debug(
         "spike %u (= %x): population not found in master population table",
         spike, spike);
 
-//    profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_POP_TABLE_GET_FIRST);
+
 
     return false;
 }
@@ -197,12 +208,8 @@ bool population_table_get_first_address(
 bool population_table_get_next_address(
         address_t* row_address, size_t* n_bytes_to_transfer) {
 
-//    profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_POP_TABLE_GET_NEXT);
-
     // If there are no more items in the list, return false
     if (items_to_go <= 0) {
-    	log_debug("items to go is zero");
-//        profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_POP_TABLE_GET_NEXT);
         return false;
     }
 
@@ -222,7 +229,6 @@ bool population_table_get_next_address(
         } else {
 
             uint32_t row_length = _get_row_length(item);
-//            log_info("Items to go was not zero, but row length is: %u", row_length);
             if (row_length > 0) {
 
                 uint32_t block_address =
@@ -246,7 +252,6 @@ bool population_table_get_next_address(
         items_to_go -= 1;
     } while (!is_valid && (items_to_go > 0));
 
-//    profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_POP_TABLE_GET_NEXT);
 
     if (!is_valid){
     	ghost_pop_table_searches += 1;
