@@ -7,8 +7,8 @@
 #include <spin1_api.h>
 #include <debug.h>
 
-extern uint32_t measurement_in[1028];
-extern uint32_t measurement_out[1028];
+extern uint32_t measurement_in[1024];
+extern uint32_t measurement_out[1024];
 extern uint32_t measure_index;
 
 // The number of DMA Buffers to use
@@ -184,6 +184,10 @@ static inline void _setup_synaptic_dma_write(uint32_t dma_buffer_index) {
 void _multicast_packet_received_callback(uint key, uint payload) {
     use(payload);
 
+//    // Profile Response Time to PR Event
+//    measurement_out[measure_index] = tc[T2_COUNT];
+//    measure_index++;
+
 //    // Profile MPR Callback
 //    measurement_in[measure_index] = tc[T2_COUNT];
 
@@ -217,6 +221,10 @@ void _multicast_packet_received_callback(uint key, uint payload) {
 // Called when a user event is received
 void _user_event_callback(uint unused0, uint unused1) {
 
+//	// Profile Response Time to User Event
+//    measurement_out[measure_index] = tc[T2_COUNT];
+//    measure_index++;
+
 //    // Profile User Event Callback
 //    measurement_in[measure_index] = tc[T2_COUNT];
 
@@ -236,12 +244,13 @@ void _user_event_callback(uint unused0, uint unused1) {
 void _dma_complete_callback(uint unused, uint tag) {
     use(unused);
 
-//    // Profile Do DMA Time (also in pipeline)
+//    // Profile Do DMA Time (also in pipeline, also in DMA Event Response time)
 //    measurement_out[measure_index] = tc[T2_COUNT];
 //    measure_index++;
 
 //    // Profile DMA Complete Callback
 //    measurement_in[measure_index] = tc[T2_COUNT];
+
 
 
     log_debug("DMA transfer complete with tag %u", tag);

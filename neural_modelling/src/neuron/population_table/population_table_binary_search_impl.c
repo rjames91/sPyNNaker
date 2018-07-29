@@ -28,8 +28,8 @@ static uint16_t next_item = 0;
 static uint16_t items_to_go = 0;
 
 // Profiler datastructures
-extern uint32_t measurement_in[1028];
-extern uint32_t measurement_out[1028];
+extern uint32_t measurement_in[1024];
+extern uint32_t measurement_out[1024];
 extern uint32_t measure_index;
 
 
@@ -150,8 +150,8 @@ bool population_table_initialise(
 bool population_table_get_first_address(
         spike_t spike, address_t* row_address, size_t* n_bytes_to_transfer) {
 
-	// Profile Population Table Get First
-	measurement_in[measure_index] = tc[T2_COUNT];
+//	// Profile Population Table Get First
+//	measurement_in[measure_index] = tc[T2_COUNT];
 
 	uint32_t imin = 0;
     uint32_t imax = master_population_table_length;
@@ -174,10 +174,10 @@ bool population_table_get_first_address(
             log_debug(
                 "spike = %08x, entry_index = %u, start = %u, count = %u",
                 spike, imid, next_item, items_to_go);
-
-            // Measure directly the time of DMA from DMA controller
-            measurement_out[measure_index] = tc[T2_COUNT];
-            measure_index++;
+//
+//            // Profile Population Table Get First
+//            measurement_out[measure_index] = tc[T2_COUNT];
+//            measure_index++;
 
             return population_table_get_next_address(
                 row_address, n_bytes_to_transfer);

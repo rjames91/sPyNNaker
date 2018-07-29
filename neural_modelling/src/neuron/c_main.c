@@ -68,9 +68,10 @@ typedef enum callback_priorities{
 #define NUMBER_OF_REGIONS_TO_RECORD 4
 
 // Globals
-uint32_t measurement_in[1028];
-uint32_t measurement_out[1028];
+uint32_t measurement_in[1024];
+uint32_t measurement_out[1024];
 uint32_t measure_index = 0 ;
+
 
 //! the current timer tick value
 //! the timer tick callback returning the same value.
@@ -250,9 +251,17 @@ void resume_callback() {
 void timer_callback(uint timer_count, uint unused) {
     use(timer_count);
     use(unused);
+    // **************************************************
+    // Profile Cost of Entering Timer Callback
+    measurement_out[measure_index] = tc[T1_COUNT];
+    measurement_in[measure_index] = 200000;
+    measure_index++;
+    // **************************************************
 
+    // **************************************************
 //    // Profile Timer Update
 //    measurement_in[measure_index] = tc[T2_COUNT];
+    // **************************************************
 
     profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_TIMER);
 
@@ -271,7 +280,7 @@ void timer_callback(uint timer_count, uint unused) {
 
         log_info("Completed a run");
 
-        for (int i=0; i< 1028; i++){
+        for (int i=0; i< 1024; i++){
         	log_info("In: %u  Out: %u  Diff: %u",
         			measurement_in[i],
 					measurement_out[i],
@@ -313,7 +322,7 @@ void timer_callback(uint timer_count, uint unused) {
         update_goal_posts(time);
         last_rewiring_time = 0;
         // put flag in spike processing to do synaptic rewiring
-//        synaptogenesis_dynamics_rewire(time);
+        // synaptogenesis_dynamics_rewire(time);
         if (is_fast()) {
             do_rewiring(rewiring_period);
         } else {
@@ -321,8 +330,8 @@ void timer_callback(uint timer_count, uint unused) {
         }
         // disable interrupts
         cpsr = spin1_int_disable();
-//       // If we're not already processing synaptic DMAs,
-//        // flag pipeline as busy and trigger a feed event
+        // If we're not already processing synaptic DMAs,
+        // flag pipeline as busy and trigger a feed event
         if (!get_dma_busy()) {
             log_debug("Sending user event for new spike");
             if (spin1_trigger_user_event(0, 0)) {
@@ -347,16 +356,49 @@ void timer_callback(uint timer_count, uint unused) {
         recording_do_timestep_update(time);
     }
 
+//    // **************************************************
 //    // Profile Profiler Cost
 //    measurement_in[measure_index] = tc[T2_COUNT];
-//
-//    // Profile Profiler Cost
 //    measurement_out[measure_index] = tc[T2_COUNT];
 //    measure_index++;
+//    // **************************************************
 
+//    // Test whether keeping the timer_callback active affects DMA variable cost
 //    while (tc[T1_COUNT] > 10000){
 //    	// do nothing
 //    }
+
+//    // **************************************************
+//    // Test cost of responding to PR Event
+//    uint32_t state = spin1_fiq_disable();
+
+//    // Test cost of responding to User Event
+//    uint32_t state = spin1_irq_disable();
+
+//    // Test cost of responding to DMA Complete Event
+//    // Locate the window starting after user event has completed and return, but while DMA is still ongoing
+//    while (tc[T1_COUNT] > 99100){
+//     	// do nothing until you know user_callback has completed, but DMA has not finished (pick a larger transfer size
+//      // to increase this window).
+//    }
+
+//    uint32_t state = spin1_irq_disable();
+//
+//    while (tc[T1_COUNT] > 40000){
+//    	// do nothing until DMA will definitely have completed
+//    }
+
+//    uint32_t state = spin1_int_disable();
+//
+//    // Start clock, and re-enable interrupts
+//    // Profile Response Time to PR, User and DMA Complete Events
+//    measurement_in[measure_index] = tc[T2_COUNT];
+//    spin1_mode_restore(state);
+
+//    // **************************************************
+//    // Profile Do DMA Time (also in pipeline, also in DMA Event Response time)
+//    measurement_out[measure_index] = tc[T2_COUNT];
+//    measure_index++;
 
     profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_TIMER);
 }
