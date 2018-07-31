@@ -80,38 +80,43 @@ static input_t additional_input_get_input_value_as_current(
     // Constants
     // NOTE: Smallest value (and a length of the gap between any two
     // neighbouring values) in long fract is 2^(-31) = 0.000000000465661.
-    long fract const0 = 0.909733lr;
-    long fract const1 = 0.00415872lr;
-    long fract const2 = 0.00007531lr;
-    long fract const3 = 0.000000630055lr;
-    long fract const4 = 0.00000000205212lr;
+    long fract const0 = 0.9184876080443717lr;
+    long fract const1 = 0.9785719997657578lr;
+    long fract const2 = 0.9660152351987441lr;
+    long fract const3 = 0.0017983013356693135lr;
+    long fract const4 = 0.0005102968729975963lr;
+    long fract const5 = 0.0008924324766459653lr;
+    long fract const6 = 0.00001009512149614703lr;
+    long fract const7 = 0.000003188659896lr;
+    long fract const8 = 0.00000609293468lr;
 
-    // Note: Membrane voltage cannot get higher than 1/const1, otherwise the
-    // following mutliplication result will produce overflow.
-    long fract mult1 = const1 * membrane_voltage;
-    // Note: Membrane voltage cannot get higher than SQRT(1/const2), etc.
-    long fract mult2 = const2 * membrane_voltage;
+    long fract first_const, mult1, mult2;
+    if (membrane_voltage < -92.5k) {
+        first_const = const0;
+        mult1 = const3 * membrane_voltage;
+        mult2 = const6 * membrane_voltage;
+    } else if (membrane_voltage > -66k) {
+        first_const = const2;
+        mult1 = const5 * membrane_voltage;
+        mult2 = const8 * membrane_voltage;
+    } else {
+        first_const = const1;
+        mult1 = const4 * membrane_voltage;
+        mult2 = const7 * membrane_voltage;
+    }
     mult2 *= membrane_voltage;
-    long fract mult3 = const3 * membrane_voltage;
-    mult3 *= membrane_voltage;
-    mult3 *= membrane_voltage;
-    // Note: Order of operations is strictly controlled, using brackets, in order to
-    // avoid large powers of membrane voltage, which would quickly overflow
-    // the accum type.
-    long fract mult4 = const4 * membrane_voltage;
-    mult4 *= membrane_voltage;
-    mult4 *= membrane_voltage;
-    mult4 *= membrane_voltage;
 
     // Note: Order of operations to avoid overflow.
-    long fract result_fract = const0 + (- mult1 - mult2) + (- mult3 - mult4);
+    long fract result_fract = first_const - mult2 - mult1;
 
     // This converts result_fract to accum (Note that likely GCC does not
     // implement any rounding on this conversion, so that can be added later
     // to improve accuracy).
     additional_input->e_to_t_on_tau_m = result_fract;
+
 */
 ////////////////////////////////////////////
+
 
 	additional_input->e_to_t_on_tau_m = 
                   expk(
