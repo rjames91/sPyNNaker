@@ -249,14 +249,16 @@ void resume_callback() {
 //! \param[in] unused unused parameter kept for API consistency
 //! \return None
 void timer_callback(uint timer_count, uint unused) {
+
+//    // **************************************************
+//    // Profile Cost of Entering Timer Callback
+//    measurement_out[measure_index] = tc[T1_COUNT];
+//    measurement_in[measure_index] = 200000;
+//    measure_index++;
+//    // **************************************************
+
     use(timer_count);
     use(unused);
-    // **************************************************
-    // Profile Cost of Entering Timer Callback
-    measurement_out[measure_index] = tc[T1_COUNT];
-    measurement_in[measure_index] = 200000;
-    measure_index++;
-    // **************************************************
 
     // **************************************************
 //    // Profile Timer Update

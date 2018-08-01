@@ -60,10 +60,16 @@ static inline void _do_dma_read(
     // buffer
     buffer_being_read = next_buffer_to_fill;
 
+
+
+
     spin1_dma_transfer(
         DMA_TAG_READ_SYNAPTIC_ROW, row_address, next_buffer->row, DMA_READ,
         n_bytes_to_transfer);
     next_buffer_to_fill = (next_buffer_to_fill + 1) % N_DMA_BUFFERS;
+
+	// Profile Do Setup DMA
+	measurement_in[measure_index] = tc[T2_COUNT];
 
 //        // Profile Do Setup DMA
 //        measurement_out[measure_index] = tc[T2_COUNT];
@@ -182,15 +188,15 @@ static inline void _setup_synaptic_dma_write(uint32_t dma_buffer_index) {
 
 // Called when a multicast packet is received
 void _multicast_packet_received_callback(uint key, uint payload) {
-    use(payload);
 
 //    // Profile Response Time to PR Event
 //    measurement_out[measure_index] = tc[T2_COUNT];
 //    measure_index++;
 
-//    // Profile MPR Callback
+////    // Profile MPR Callback
 //    measurement_in[measure_index] = tc[T2_COUNT];
 
+    use(payload);
     any_spike = true;
     log_debug("Received spike %x at %d, DMA Busy = %d", key, time, dma_busy);
 
@@ -244,9 +250,9 @@ void _user_event_callback(uint unused0, uint unused1) {
 void _dma_complete_callback(uint unused, uint tag) {
     use(unused);
 
-//    // Profile Do DMA Time (also in pipeline, also in DMA Event Response time)
-//    measurement_out[measure_index] = tc[T2_COUNT];
-//    measure_index++;
+    // Profile Do DMA Time (also in pipeline, also in DMA Event Response time)
+    measurement_out[measure_index] = tc[T2_COUNT];
+    measure_index++;
 
 //    // Profile DMA Complete Callback
 //    measurement_in[measure_index] = tc[T2_COUNT];
@@ -299,7 +305,7 @@ void _dma_complete_callback(uint unused, uint tag) {
 //    // Start the next DMA transfer, so it is complete when we are finished
 //    _setup_synaptic_dma_read();
 
-//    // Profile DMA Complete Callback
+////    // Profile DMA Complete Callback
 //    measurement_out[measure_index] = tc[T2_COUNT];
 //    measure_index++;
 

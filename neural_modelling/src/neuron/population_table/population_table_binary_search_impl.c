@@ -174,7 +174,7 @@ bool population_table_get_first_address(
             log_debug(
                 "spike = %08x, entry_index = %u, start = %u, count = %u",
                 spike, imid, next_item, items_to_go);
-//
+
 //            // Profile Population Table Get First
 //            measurement_out[measure_index] = tc[T2_COUNT];
 //            measure_index++;
