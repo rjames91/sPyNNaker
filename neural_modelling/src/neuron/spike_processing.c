@@ -61,15 +61,19 @@ static inline void _do_dma_read(
     buffer_being_read = next_buffer_to_fill;
 
 
+//	// Profile Do Setup DMA
+//	measurement_in[measure_index] = tc[T2_COUNT];
 
+    // Measure directly the time of DMA from DMA controller
+    measurement_out[measure_index] = tc[T2_COUNT];
+    measure_index++;
 
     spin1_dma_transfer(
         DMA_TAG_READ_SYNAPTIC_ROW, row_address, next_buffer->row, DMA_READ,
         n_bytes_to_transfer);
     next_buffer_to_fill = (next_buffer_to_fill + 1) % N_DMA_BUFFERS;
 
-	// Profile Do Setup DMA
-	measurement_in[measure_index] = tc[T2_COUNT];
+
 
 //        // Profile Do Setup DMA
 //        measurement_out[measure_index] = tc[T2_COUNT];
@@ -231,8 +235,8 @@ void _user_event_callback(uint unused0, uint unused1) {
 //    measurement_out[measure_index] = tc[T2_COUNT];
 //    measure_index++;
 
-//    // Profile User Event Callback
-//    measurement_in[measure_index] = tc[T2_COUNT];
+    // Profile User Event Callback
+    measurement_in[measure_index] = tc[T2_COUNT];
 
     use(unused0);
     use(unused1);
@@ -250,9 +254,9 @@ void _user_event_callback(uint unused0, uint unused1) {
 void _dma_complete_callback(uint unused, uint tag) {
     use(unused);
 
-    // Profile Do DMA Time (also in pipeline, also in DMA Event Response time)
-    measurement_out[measure_index] = tc[T2_COUNT];
-    measure_index++;
+//    // Profile Do DMA Time (also in pipeline, also in DMA Event Response time)
+//    measurement_out[measure_index] = tc[T2_COUNT];
+//    measure_index++;
 
 //    // Profile DMA Complete Callback
 //    measurement_in[measure_index] = tc[T2_COUNT];
