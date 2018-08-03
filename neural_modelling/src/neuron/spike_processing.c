@@ -64,9 +64,9 @@ static inline void _do_dma_read(
 //	// Profile Do Setup DMA
 //	measurement_in[measure_index] = tc[T2_COUNT];
 
-    // Measure directly the time of DMA from DMA controller
-    measurement_out[measure_index] = tc[T2_COUNT];
-    measure_index++;
+//    // Measure directly the time of DMA from DMA controller
+//    measurement_out[measure_index] = tc[T2_COUNT];
+//    measure_index++;
 
     spin1_dma_transfer(
         DMA_TAG_READ_SYNAPTIC_ROW, row_address, next_buffer->row, DMA_READ,
@@ -226,17 +226,20 @@ void _multicast_packet_received_callback(uint key, uint payload) {
 //    measurement_out[measure_index] = tc[T2_COUNT];
 //    measure_index++;
 
+    // Profile MPR Callback
+    measurement_in[measure_index] = tc[T2_COUNT];
+
 }
 
 // Called when a user event is received
 void _user_event_callback(uint unused0, uint unused1) {
 
-//	// Profile Response Time to User Event
-//    measurement_out[measure_index] = tc[T2_COUNT];
-//    measure_index++;
+	// Profile Response Time to User Event
+    measurement_out[measure_index] = tc[T2_COUNT];
+    measure_index++;
 
-    // Profile User Event Callback
-    measurement_in[measure_index] = tc[T2_COUNT];
+//    // Profile User Event Callback
+//    measurement_in[measure_index] = tc[T2_COUNT];
 
     use(unused0);
     use(unused1);
@@ -263,14 +266,21 @@ void _dma_complete_callback(uint unused, uint tag) {
 
 
 
+
     log_debug("DMA transfer complete with tag %u", tag);
 
     // Get pointer to current buffer
     uint32_t current_buffer_index = buffer_being_read;
     dma_buffer *current_buffer = &dma_buffers[current_buffer_index];
 
+
+
+
     // Start the next DMA transfer, so it is complete when we are finished
     _setup_synaptic_dma_read();
+
+
+
 
     // Process synaptic row repeatedly
     bool subsequent_spikes;
@@ -302,6 +312,11 @@ void _dma_complete_callback(uint unused, uint tag) {
         }
     } while (subsequent_spikes);
 
+
+//    // Profile DMA Complete Callback
+//    measurement_out[measure_index] = tc[T2_COUNT];
+//    measure_index++;
+
 //    // Profile DMA Complete Callback
 //    measurement_out[measure_index] = tc[T2_COUNT];
 //    measure_index++;
@@ -315,6 +330,9 @@ void _dma_complete_callback(uint unused, uint tag) {
 
 //	// Profile DMA Time (in pipeline)
 //	measurement_in[measure_index] = tc[T2_COUNT];
+
+//    // Profile DMA Complete Callback
+//    measurement_in[measure_index] = tc[T2_COUNT];
 
 }
 
