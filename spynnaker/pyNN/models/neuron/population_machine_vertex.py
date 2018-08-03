@@ -183,7 +183,7 @@ class PopulationMachineVertex(
             max_spikes_in_a_tick,
             report=max_spikes_in_a_tick > -1,
             message=(
-                "Max spikes, dmas, pipeline_restarts, syn_events between timer "
+                "Max spikes, dmas, pipeline_kickstarts, syn_events between timer "
                 "events for {} on {}, {}, {}, was: {}, {}, {}, {}, {}, {}".format(label, x, y, p,
                     max_spikes_in_a_tick, max_dmas_in_a_tick,
                     max_pipeline_restarts_between_ticks, n_pre_synaptic_events,
