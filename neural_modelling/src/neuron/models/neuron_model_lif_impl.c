@@ -40,8 +40,10 @@ state_t neuron_model_state_update(
 			total_inh += inh_input[i];
 		}
         // Get the input in nA
-        input_t input_this_timestep =
-            total_exc - total_inh + external_bias + neuron->I_offset;
+       input_t input_this_timestep;
+       long accum check = total_exc - total_inh + external_bias + neuron->I_offset;
+       if (check<=150) input_this_timestep = check;
+       else input_this_timestep = 150k;
 
         _lif_neuron_closed_form(
             neuron, neuron->V_membrane, input_this_timestep);
