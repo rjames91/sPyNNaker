@@ -532,11 +532,14 @@ class SynapticManager(object):
             max_weight_powers = (m + 1 for m in max_weight_powers)
 
         if "fixed_weight_scale" in machine_vertex.label: #isinstance(synapse_dynamics,SynapseDynamicsSTDP):# and isinstance(connector, AllToAllConnector):#
-            #output = [4, 4] #scale by 2**11
-            output = [3, 3]  # scale by 2**12
-            #output = [2,2]#[1,1]#scale by 2*14 (w2s=2.0)
-            #output = [3, 0]  # same scaling as onetoone connections with a weight=w2s (producing nice STDP curves)
-            #output = list(max_weight_powers)#[4,0]#
+            if "cond" in machine_vertex.label:
+                output = [13, 13]
+            else:
+                #output = [4, 4] #scale by 2**11
+                output = [3, 3]  # scale by 2**12
+                #output = [2,2]#[1,1]#scale by 2*14 (w2s=2.0)
+                #output = [3, 0]  # same scaling as onetoone connections with a weight=w2s (producing nice STDP curves)
+                #output = list(max_weight_powers)#[4,0]#
         else:
             output = list(max_weight_powers)  #[4, 4]  #TODO: investigate why there is a different SSP weight power caluculated for the first vertex
         return output
