@@ -53,19 +53,42 @@ class WeightDependenceAdditive(
         for w in weight_scales:
 
             # Scale the weights
-            spec.write_value(
-                data=int(round(self._w_min * w)), data_type=DataType.INT32)
-            spec.write_value(
-                data=int(round(self._w_max * w)), data_type=DataType.INT32)
+            scaled_max = int(round(self._w_max * w))
+            scaled_min = int(round(self._w_min * w))
 
+            if scaled_max == 0:
+                raise ArithmeticError("STDP max weight constant (w_max={} weight_scale={})"
+                                      " has been scaled to 0!".format(self._w_max, w))
+            if scaled_min == 0 and self._w_min != 0:
+                raise ArithmeticError("STDP min weight constant (w_min={} weight_scale={})"
+                                      " has been scaled to 0!".format(self._w_min, w))
+            if scaled_max & int(0x10000):
+                raise ArithmeticError("STDP max weight constant (w_max={} weight_scale={})"
+                                      " has been scaled to a value too big for an int16!({})".format(self._w_max, w,
+                                                                                                     hex(scaled_max)))
+            spec.write_value(
+                # data=int(round(self._w_min * w)), data_type=DataType.INT32)
+                data=scaled_min, data_type=DataType.INT32)
+            spec.write_value(
+                # data=int(round(self._w_max * w)), data_type=DataType.INT32)
+                data=scaled_max, data_type=DataType.INT32)
             # Based on http://data.andrewdavison.info/docs/PyNN/_modules/pyNN
             #                /standardmodels/synapses.html
             # Pre-multiply A+ and A- by Wmax
+            scaled_a_plus = int(round(self._a_plus * self._w_max * w))
+            scaled_a_minus = int(round(self._a_minus * self._w_max * w))
+
+            # scaled_a_plus = int(abs(round(math.log(self._a_plus,2.))))
+            # scaled_a_minus = int(abs(round(math.log(self._a_minus,2.))))
+
+            if scaled_a_minus == 0 or scaled_a_plus == 0:
+                raise ArithmeticError("STDP alpha constants (a_plus={} a_minus={} weight_scale={})"
+                                      " have been scaled to 0!".format(self._a_plus, self._a_minus, w))
             spec.write_value(
-                data=int(round(self._a_plus * self._w_max * w)),
+                data=scaled_a_plus,
                 data_type=DataType.INT32)
             spec.write_value(
-                data=int(round(self._a_minus * self._w_max * w)),
+                data=scaled_a_minus,
                 data_type=DataType.INT32)
 
     @property

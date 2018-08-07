@@ -186,8 +186,8 @@ static inline int pack(
 //! \return address_t Address after the final word read from SDRAM.
 address_t synaptogenesis_dynamics_initialise(address_t sdram_sp_address)
 {
-    log_info("SR init.");
-    log_debug("Registering DMA callback");
+    //log_info("SR init.");
+    //log_debug("Registering DMA callback");
     simulation_dma_transfer_done_callback_on(
 	    DMA_TAG_READ_SYNAPTIC_ROW_FOR_REWIRING,
 	    synaptic_row_restructure);
@@ -199,7 +199,7 @@ address_t synaptogenesis_dynamics_initialise(address_t sdram_sp_address)
     rewiring_data.weight[0] = *sp_word++;
     rewiring_data.weight[1] = *sp_word++;
 
-    log_info("w[%d, %d]",rewiring_data.weight[0],rewiring_data.weight[1]);
+    //log_info("w[%d, %d]",rewiring_data.weight[0],rewiring_data.weight[1]);
 
     rewiring_data.delay = *sp_word++;
     rewiring_data.s_max = *sp_word++;
@@ -252,7 +252,7 @@ address_t synaptogenesis_dynamics_initialise(address_t sdram_sp_address)
         subpopinfo->sp_control = *half_word++;
         sp_word = (int32_t *) half_word;
         subpopinfo->connection_type = *sp_word++;
-        log_info("syn_type %d", subpopinfo->connection_type);
+       // log_info("syn_type %d", subpopinfo->connection_type);
         subpopinfo->total_no_atoms = *sp_word++;
         subpopinfo->key_atom_info = sark_alloc(
         	subpopinfo->no_pre_vertices, sizeof(key_atom_info_t));
@@ -310,7 +310,7 @@ address_t synaptogenesis_dynamics_initialise(address_t sdram_sp_address)
     rewiring_dma_buffer.row = sark_alloc(
             10 * rewiring_data.s_max, sizeof(uint32_t));
     if (rewiring_dma_buffer.row == NULL) {
-        log_error("Fail init DMA buffers");
+       // log_error("Fail init DMA buffers");
         rt_error(RTE_SWERR);
     }
 
@@ -457,7 +457,7 @@ void synaptogenesis_dynamics_rewire(uint32_t time)
 
     if (!population_table_get_first_address(_spike, &synaptic_row_address,
 	    &n_bytes)) {
-        log_error("FAIL@key %d", _spike);
+        //log_error("FAIL@key %d", _spike);
         rt_error(RTE_SWERR);
     }
 
@@ -519,7 +519,7 @@ void synaptogenesis_dynamics_rewire(uint32_t time)
     while (!spin1_dma_transfer(
             DMA_TAG_READ_SYNAPTIC_ROW_FOR_REWIRING, synaptic_row_address,
             rewiring_dma_buffer.row, DMA_READ, n_bytes)) {
-        log_error("DMA queue full-read");
+       // log_error("DMA queue full-read");
     }
     rewiring_dma_buffer.n_bytes_transferred = n_bytes;
     rewiring_dma_buffer.sdram_writeback_address = synaptic_row_address;
