@@ -282,7 +282,7 @@ void timer_callback(uint timer_count, uint unused) {
 
         log_info("Completed a run");
 
-        for (int i=0; i< 1024; i++){
+        for (int i=0; i< 112; i++){
         	log_info("In: %u  Out: %u  Diff: %u",
         			measurement_in[i],
 					measurement_out[i],
@@ -398,8 +398,8 @@ void timer_callback(uint timer_count, uint unused) {
 //    spin1_mode_restore(state);
 
 //    // **************************************************
-//    // Profile Do DMA Time (also in pipeline, also in DMA Event Response time)
-//    measurement_out[measure_index] = tc[T2_COUNT];
+    // Profile Do DMA Time (also in pipeline, also in DMA Event Response time)
+//    measurement_in[measure_index] = tc[T1_COUNT];
 //    measure_index++;
 
     profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_TIMER);

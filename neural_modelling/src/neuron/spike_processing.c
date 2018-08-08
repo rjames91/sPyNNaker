@@ -226,17 +226,17 @@ void _multicast_packet_received_callback(uint key, uint payload) {
 //    measurement_out[measure_index] = tc[T2_COUNT];
 //    measure_index++;
 
-    // Profile MPR Callback
-    measurement_in[measure_index] = tc[T2_COUNT];
+//    // Profile MPR Callback
+//    measurement_in[measure_index] = tc[T2_COUNT];
 
 }
 
 // Called when a user event is received
 void _user_event_callback(uint unused0, uint unused1) {
 
-	// Profile Response Time to User Event
-    measurement_out[measure_index] = tc[T2_COUNT];
-    measure_index++;
+//	// Profile Response Time to User Event
+//    measurement_out[measure_index] = tc[T2_COUNT];
+//    measure_index++;
 
 //    // Profile User Event Callback
 //    measurement_in[measure_index] = tc[T2_COUNT];

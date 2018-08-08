@@ -340,6 +340,8 @@ void synapses_do_timestep_update(timer_t time) {
     // Disable interrupts to stop DMAs interfering with the ring buffers
     uint32_t state = spin1_irq_disable();
 
+    measurement_in[measure_index] = tc[T2_COUNT];
+
     // Transfer the input from the ring buffers into the input buffers
     for (uint32_t neuron_index = 0; neuron_index < n_neurons;
             neuron_index++) {
@@ -372,6 +374,9 @@ void synapses_do_timestep_update(timer_t time) {
             ring_buffers[ring_buffer_index] = 0;
         }
     }
+
+    measurement_out[measure_index] = tc[T2_COUNT];
+    measure_index++;
 
     _print_inputs();
 

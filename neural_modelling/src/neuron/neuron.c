@@ -122,6 +122,12 @@ static uint32_t expected_time;
 //! The number of recordings outstanding
 static uint32_t n_recordings_outstanding = 0;
 
+extern uint32_t measurement_in[1024];
+extern uint32_t measurement_out[1024];
+extern uint32_t measure_index;
+
+
+
 //! parameters that reside in the neuron_parameter_data_region in human
 //! readable form
 typedef enum parmeters_in_neuron_parameter_data_region {
@@ -412,6 +418,7 @@ bool neuron_initialise(address_t address, uint32_t recording_flags_param,
         return false;
     }
 
+
     // Size of recording indexes
     if (global_record_params->v_recording == n_neurons){
         voltages_size = sizeof(uint32_t) + sizeof(state_t) * n_neurons;
@@ -423,7 +430,7 @@ bool neuron_initialise(address_t address, uint32_t recording_flags_param,
         voltages = (timed_state_t *) spin1_malloc(
             voltages_size + sizeof(state_t));
     }
-    //log_debug("voltage_size = %u", voltages_size);
+    log_info("voltage_size = %u", voltages_size);
 
     if (global_record_params->exc_recording == n_neurons){
         exc_size = sizeof(uint32_t) + sizeof(input_struct_t) * n_neurons;
@@ -435,7 +442,7 @@ bool neuron_initialise(address_t address, uint32_t recording_flags_param,
         inputs_excitatory = (timed_input_t *) spin1_malloc(
             exc_size + sizeof(input_struct_t));
     }
-    //log_debug("exc_size = %u", exc_size);
+    log_info("exc_size = %u", exc_size);
 
     if (global_record_params->inh_recording == n_neurons){
         inh_size = sizeof(uint32_t) + sizeof(input_struct_t) * n_neurons;
@@ -447,9 +454,19 @@ bool neuron_initialise(address_t address, uint32_t recording_flags_param,
         inputs_inhibitory = (timed_input_t *) spin1_malloc(
             inh_size + sizeof(input_struct_t));
     }
-    //log_debug("inh_size = %u", inh_size);
+    log_info("inh_size = %u", inh_size);
 
     _print_neuron_parameters();
+
+    log_info("Backoff time: %u",expected_time);
+//    expected_time = 200000;
+
+    log_info("Time between spikes: %u", time_between_spikes);
+//    time_between_spikes = 4;
+
+    log_info("Random backoff: %u", random_backoff);
+
+    log_info("does this wrap?: %u", 40 - 600);
 
     return true;
 }
@@ -596,6 +613,10 @@ void neuron_do_timestep_update(timer_t time) {
             NUM_INHIBITORY_RECEPTORS, inh_syn_input,
             external_bias, neuron);
 
+
+//        // Profile Additional Cost of Spiking
+//        measurement_in[measure_index] = tc[T2_COUNT];
+
         // Determine if a spike should occur
         bool spike = threshold_type_is_above_threshold(result, threshold_type);
 
@@ -615,6 +636,9 @@ void neuron_do_timestep_update(timer_t time) {
             // Record the spike
             out_spikes_set_spike(indexes->spike);
 
+//            // Profile Just Spike
+//            measurement_in[measure_index] = tc[T2_COUNT];
+
             if (use_key) {
 
                 // Wait until the expected time to send
@@ -630,13 +654,20 @@ void neuron_do_timestep_update(timer_t time) {
                     spin1_delay_us(1);
                 }
             }
-
+//            // Profile Just Spike
+//            measurement_out[measure_index] = tc[T2_COUNT];
+//            measure_index++;
 
         } else {
             log_debug("the neuron %d has been determined to not spike",
                       neuron_index);
          }
     }
+
+//    // Profile Additional Cost of Spiking
+//    measurement_out[measure_index] = tc[T2_COUNT];
+//    measure_index++;
+
 
     // Disable interrupts to avoid possible concurrent access
     uint cpsr = 0;

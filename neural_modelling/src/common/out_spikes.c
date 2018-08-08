@@ -37,6 +37,9 @@ bool out_spikes_initialize(size_t max_spike_sources) {
         log_error("Out of DTCM when allocating out_spikes");
         return false;
     }
+
+    log_info("size of spikes: %u", sizeof(timed_out_spikes) + (out_spikes_size * sizeof(uint32_t)));
+
     out_spikes = &(spikes->out_spikes[0]);
     out_spikes_reset();
     return true;
