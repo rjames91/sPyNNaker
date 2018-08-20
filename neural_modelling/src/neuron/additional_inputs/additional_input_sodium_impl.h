@@ -10,30 +10,30 @@ typedef struct additional_input_t {
 
     // Sodium Current
     accum    I_NaP;
-    accum    m;  // not used here
-    accum    m_inf;
-    accum    h;  // not used here
-    accum    h_inf;  // not used here
-    accum    e_to_t_on_tau_m;  // not used here
-    accum    e_to_t_on_tau_h;  // not used here
+    accum    m_NaP;  // not used here
+    accum    m_inf_NaP;
+
+    accum    h_NaP;  // not used here
+    accum    h_inf_NaP;  // not used here
+    accum    e_to_t_on_tau_m_NaP;  // not used here
+
+    accum    e_to_t_on_tau_h_NaP;  // not used here
     accum    g_NaP; // max sodium conductance
     accum    E_NaP; // sodium reversal potential
-    accum    dt;
 
+    // Voltage Clamp 
+    REAL      V_clamp;    // voltage for voltage clamp [mV], hold voltage is just V_rest
+    uint32_t  S_clamp;    // clamp starting time [timesteps]
+    uint32_t  T_clamp;    // clamp duration [timesteps] 
+    accum    dt;
 } additional_input_t;
 
 
 // Variables to control 'patch clamp' tests
 static input_t local_v = -65;
-static uint32_t n_spikes = 0;
 
 // Variable to set m = m_inf on first timestep.
 static uint32_t n_dt = 0;
-
-// Variable to get the V_reset value from other neurons which will be used to clamp the neuron in each new spike arrival.
-static neuron_pointer_t clamp_neuron;
-
-
 
 //static inline void _print_additional_input_params(additional_input_t* additional_input){
 //        log_info("\n"
@@ -56,24 +56,35 @@ static neuron_pointer_t clamp_neuron;
 static input_t additional_input_get_input_value_as_current(
         additional_input_pointer_t additional_input,
         state_t membrane_voltage) {
-
-        // Hardcode membrane potential during tests:                                                                   │
-        membrane_voltage = local_v; 
-
+//------------------------------------------------------------------------
+         if (n_dt >= additional_input->S_clamp &&
+            n_dt < additional_input->S_clamp + additional_input->T_clamp){
+        // local_v +=1;
+        // membrane_voltage = local_v;
+        local_v = additional_input->V_clamp;
+         } else {
+        local_v = -65;
+        }
+        
+        membrane_voltage = local_v;
+        // log_info("membrane potential: %k", membrane_voltage);
+        n_dt += 1;
+//------------------------------------------------------------------------
     profiler_write_entry_disable_irq_fiq(
         PROFILER_ENTER | PROFILER_INTRINSIC_CURRENT);
+//------------------------------------------------------------------------
 
         additional_input->g_NaP = 0.007k;
 
-	additional_input->m_inf = 1k / (1k
+	additional_input->m_inf_NaP = 1k / (1k
                                   + expk(-(membrane_voltage+55.7k)*0.12987k)); // 1/7.7 = 0.129870129
 
         // h (inactivation) is 1 and constant, so we will just ignore it.
 	additional_input->I_NaP =
                  additional_input->g_NaP *
-		 additional_input->m_inf *
-		 additional_input->m_inf *
-		 additional_input->m_inf *
+		 additional_input->m_inf_NaP *
+		 additional_input->m_inf_NaP *
+		 additional_input->m_inf_NaP *
 		(membrane_voltage - 45.0k); //additional_input->E_H);
 
 /*
@@ -83,33 +94,18 @@ static input_t additional_input_get_input_value_as_current(
 			additional_input->m_inf,
 			additional_input->I_NaP);
 */
-
+//------------------------------------------------------------------------
     profiler_write_entry_disable_irq_fiq(
         PROFILER_EXIT | PROFILER_INTRINSIC_CURRENT);
-//    return additional_input->m;
-//    return additional_input->e_to_t_on_tau_m;
-//    return m_factor;
-//    return additional_input-> m_inf;
     return additional_input->I_NaP;
 }
 
 //static void
 
 static additional_input_has_spiked(
-        additional_input_pointer_t additional_input, neuron_pointer_t neuron, neuron_pointer_t neuron_array, uint32_t n_neurons) {
+        additional_input_pointer_t additional_input ) {
 
 //      log_info("number of post-synaptic spikes: %u", n_spikes);
-
-        n_spikes += 1;
-        log_info("number of post-synaptic spikes: %u", n_spikes);
-
-
-        if (n_spikes==1){
-                local_v = neuron->V_reset;
-        } else if (n_spikes==2){
-                local_v = -65;
-        }
-
 
 }
 

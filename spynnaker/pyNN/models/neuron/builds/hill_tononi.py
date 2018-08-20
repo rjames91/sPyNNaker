@@ -23,7 +23,6 @@ class HillTononi(AbstractPopulationVertex):
     # #### Neuron Model ####
         'tau_refrac': 0.1, 'i_offset': 0,
         'tau_m': 20.0, 'cm': 1.0, 'v_rest': -65.0, 'v_reset': -65.0,
-
     # #### Threshold ####
         'v_thresh': 0, 'v_thresh_resting': -50, 'v_thresh_tau':50,
         'v_thresh_Na_reversal':40,
@@ -49,15 +48,20 @@ class HillTononi(AbstractPopulationVertex):
 
     # ##### Additional Inputs ####
     # Pacemaker
-        'I_H': 1,
-        'g_H': 9,
-        'e_H': 10,
-        'm': 5,
-        'm_inf': 6,
-        'e_to_t_on_tau_m': 7,
-        'h': -2,
-        'h_inf': -3,
-        'e_to_t_on_tau_h': -4
+        'I_H':-0.2,
+        'g_H':1,
+        'E_H':1,
+        'm_H':1,
+        'm_inf_H':1,
+        'e_to_t_on_tau_m_H':1,
+        'h_H':1,
+        'h_inf_H':1,
+        'e_to_t_on_tau_h_H':1,
+    # Voltage Clamp
+        'v_clamp': -75.0,
+        's_clamp': 30.0,
+        't_clamp': 1.0,
+        'dt':1.0
         }
 
     initialize_parameters = {'v_init': -65}
@@ -82,7 +86,6 @@ class HillTononi(AbstractPopulationVertex):
             v_reset=default_parameters['v_reset'],
             i_offset=default_parameters['i_offset'],
             v_init=initialize_parameters['v_init'],
-
 
 
         # Synapse parameters
@@ -128,16 +131,20 @@ class HillTononi(AbstractPopulationVertex):
         # additional inputs
             # Pacemaker
             I_H = default_parameters['I_H'],
-            m = default_parameters['m'],
-            m_inf = default_parameters['m_inf'],
-            h = default_parameters['h'],
-            h_inf = default_parameters['h_inf'],
-            e_to_t_on_tau_m = default_parameters['e_to_t_on_tau_m'],
-            e_to_t_on_tau_h = default_parameters['e_to_t_on_tau_h'],
             g_H = default_parameters['g_H'],
-            e_H = default_parameters['e_H'],
-
-
+            E_H = default_parameters['E_H'],
+            m_H = default_parameters['m_H'],
+            m_inf_H = default_parameters['m_inf_H'],
+            e_to_t_on_tau_m_H = default_parameters['e_to_t_on_tau_m_H'],
+            h_H = default_parameters['h_H'],
+            h_inf_H = default_parameters['h_inf_H'],
+            e_to_t_on_tau_h_H = default_parameters['e_to_t_on_tau_h_H'],
+        # Voltage Clamps
+            v_clamp = default_parameters['v_clamp'],
+            s_clamp = default_parameters['s_clamp'],
+            t_clamp = default_parameters['t_clamp'],
+        # Other 
+            dt = default_parameters['dt'],
         # Threshold parameters
             v_thresh=default_parameters['v_thresh'],
             v_thresh_resting=default_parameters['v_thresh_resting'],
@@ -192,14 +199,18 @@ class HillTononi(AbstractPopulationVertex):
         additional_input = AdditionalInputHTPacemaker(
                 n_neurons=n_neurons,
                 I_H = I_H,
-                m = m,
-                m_inf = m_inf,
-                h = h,
-                h_inf = h_inf,
-                e_to_t_on_tau_m = e_to_t_on_tau_m,
-                e_to_t_on_tau_h = e_to_t_on_tau_h,
                 g_H = g_H,
-                e_H = e_H
+                E_H = E_H,
+                m_H = m_H,
+                m_inf_H = m_inf_H,
+                e_to_t_on_tau_m_H = e_to_t_on_tau_m_H,
+                h_H = h_H,
+                h_inf_H = h_inf_H,
+                e_to_t_on_tau_h_H = e_to_t_on_tau_h_H,
+                v_clamp = v_clamp,
+                s_clamp = s_clamp,
+                t_clamp = t_clamp,
+                dt = dt
                 )
 
         threshold_type = ThresholdTypeHTDynamic(n_neurons, v_thresh,
