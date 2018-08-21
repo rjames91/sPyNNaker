@@ -279,7 +279,8 @@ void _dma_complete_callback(uint unused, uint tag) {
     // Start the next DMA transfer, so it is complete when we are finished
     _setup_synaptic_dma_read();
 
-
+    // Profile DMA Complete Callback
+    measurement_in[measure_index] = tc[T2_COUNT];
 
 
     // Process synaptic row repeatedly
@@ -324,9 +325,9 @@ void _dma_complete_callback(uint unused, uint tag) {
 //    // Start the next DMA transfer, so it is complete when we are finished
 //    _setup_synaptic_dma_read();
 
-////    // Profile DMA Complete Callback
-//    measurement_out[measure_index] = tc[T2_COUNT];
-//    measure_index++;
+//    // Profile DMA Complete Callback
+    measurement_out[measure_index] = tc[T2_COUNT];
+    measure_index++;
 
 //	// Profile DMA Time (in pipeline)
 //	measurement_in[measure_index] = tc[T2_COUNT];
