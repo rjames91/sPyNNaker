@@ -424,6 +424,7 @@ void synaptogenesis_dynamics_rewire(uint32_t time)
             }
         }
     } else if (!element_exists && rewiring_data.random_partner) {
+    // Select presynaptic population
 	pre_app_pop = ulrbits(mars_kiss64_seed(rewiring_data.local_seed))
         	    * rewiring_data.pre_pop_info_table.no_pre_pops;
 	subpopulation_info_t *preapppop_info =
@@ -543,7 +544,10 @@ void synaptic_row_restructure(uint dma_id, uint dma_tag)
 
     if (current_state.element_exists && search_hit) {
         synaptogenesis_dynamics_elimination_rule();
-    } else {
+    }
+//    else{
+    else if (!current_state.element_exists && !search_hit){//no multapses
+
         synaptogenesis_dynamics_formation_rule();
     }
     // service the next event (either rewiring or synaptic)
@@ -577,13 +581,15 @@ bool synaptogenesis_dynamics_elimination_rule(void)
     // Is synaptic weight <.5 g_max? (i.e. synapse is depressed)
     uint32_t r = mars_kiss64_seed(rewiring_data.local_seed);
     int appr_scaled_weight = rewiring_data.weight[current_state.connection_type];
-    if (current_state.sp_data.weight < (appr_scaled_weight / 2) &&
+//    if (current_state.sp_data.weight < (appr_scaled_weight / 2) &&
+    if (current_state.sp_data.weight < (appr_scaled_weight) &&
             r > rewiring_data.p_elim_dep) {
         return false;
     }
 
     // otherwise, if synapse is potentiated, use probability 2
-    if (current_state.sp_data.weight >= (appr_scaled_weight / 2) &&
+//    if (current_state.sp_data.weight >= (appr_scaled_weight / 2) &&
+    if (current_state.sp_data.weight >= (appr_scaled_weight) &&
             r > rewiring_data.p_elim_pot) {
         return false;
     }

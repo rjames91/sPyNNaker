@@ -57,6 +57,8 @@ class SynapseDynamicsStructuralCommon(AbstractSynapseDynamicsStructural):
         "_p_rew",
         # Initial weight assigned to a newly formed connection
         "_initial_weight",
+        # Initial inh weight assigned to a newly formed connection
+        "_initial_inh_weight",
         # Delay assigned to a newly formed connection
         "_initial_delay",
         # Maximum fan-in per target layer neuron
@@ -116,6 +118,7 @@ class SynapseDynamicsStructuralCommon(AbstractSynapseDynamicsStructural):
                  stdp_model=default_parameters['stdp_model'],
                  f_rew=default_parameters['f_rew'],
                  weight=default_parameters['weight'],
+                 inh_weight = default_parameters['weight'],
                  delay=default_parameters['delay'],
                  s_max=default_parameters['s_max'],
                  sigma_form_forward=default_parameters['sigma_form_forward'],
@@ -131,6 +134,7 @@ class SynapseDynamicsStructuralCommon(AbstractSynapseDynamicsStructural):
         self._f_rew = f_rew
         self._p_rew = 1. / self._f_rew
         self._initial_weight = weight
+        self._initial_inh_weight =inh_weight
         self._initial_delay = delay
         self._s_max = s_max
         self._lateral_inhibition = lateral_inhibition
@@ -138,8 +142,8 @@ class SynapseDynamicsStructuralCommon(AbstractSynapseDynamicsStructural):
         self._sigma_form_lateral = sigma_form_lateral
         self._p_form_forward = p_form_forward
         self._p_form_lateral = p_form_lateral
-        self._p_elim_dep = p_elim_dep
-        self._p_elim_pot = p_elim_pot
+        self._p_elim_dep = int(p_elim_dep*0xFFFFFFFF)
+        self._p_elim_pot = int(p_elim_pot*0xFFFFFFFF)
         self._grid = np.asarray(grid, dtype=int)
         self._random_partner = random_partner
         self._connections = {}
@@ -203,6 +207,7 @@ class SynapseDynamicsStructuralCommon(AbstractSynapseDynamicsStructural):
 
         if type == 'manhattan':
             return np.abs(delta).sum(axis=-1)
+
         return np.sqrt((delta ** 2).sum(axis=-1))
 
     def generate_distance_probability_array(self, probability, sigma):
@@ -354,11 +359,14 @@ class SynapseDynamicsStructuralCommon(AbstractSynapseDynamicsStructural):
                 data=int((self._p_rew * 10 ** 6) / float(machine_time_step)))
 
         # scale the excitatory weight appropriately
+        test = int(round(self._initial_inh_weight * weight_scales[1]))
         spec.write_value(
             data=int(round(self._initial_weight * weight_scales[0])))
         # scale the inhibitory weight appropriately
+        test = int(round(self._initial_inh_weight * weight_scales[1]))
         spec.write_value(
-            data=int(round(self._initial_weight * weight_scales[1])))
+            # data=int(round(self._initial_weight * weight_scales[1])))
+            data=int(round(self._initial_inh_weight * weight_scales[1])))
         spec.write_value(data=self._initial_delay)
         spec.write_value(data=int(self._s_max))
         spec.write_value(data=int(self._lateral_inhibition),
@@ -377,8 +385,8 @@ class SynapseDynamicsStructuralCommon(AbstractSynapseDynamicsStructural):
         spec.write_value(data=self._grid[1])
 
         # write probabilities for elimination
-        spec.write_value(data=self._p_elim_dep, data_type=DataType.U032)
-        spec.write_value(data=self._p_elim_pot, data_type=DataType.U032)
+        spec.write_value(data=self._p_elim_dep, data_type=DataType.UINT32)
+        spec.write_value(data=self._p_elim_pot, data_type=DataType.UINT32)
 
         # write the random seed (4 words), generated randomly,
         # but the same for all postsynaptic vertices!
