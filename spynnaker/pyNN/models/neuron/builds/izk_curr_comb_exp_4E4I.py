@@ -13,7 +13,7 @@ from spynnaker.pyNN.models.neuron.abstract_population_vertex \
 import numpy
 
 _IZK_THRESHOLD = 30.0
-DEFAULT_MAX_ATOMS_PER_CORE = 32
+DEFAULT_MAX_ATOMS_PER_CORE = 64
 class IzkCurrCombExp4E4I(AbstractPopulationVertex):
 
     _model_based_max_atoms_per_core = DEFAULT_MAX_ATOMS_PER_CORE
