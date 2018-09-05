@@ -100,7 +100,7 @@ static input_t additional_input_get_input_value_as_current(
 
 	additional_input->I_DK = - additional_input->g_DK 
                                  * additional_input->m_inf_DK 
-                                 * (membrane_voltage - additional_input->E_H);
+                                 * (membrane_voltage - additional_input->E_DK);
 
         //    _print_additional_input_params(additional_input);
 //------------------------------------------------------------------------
